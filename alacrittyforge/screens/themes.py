@@ -12,10 +12,13 @@ from ..theme_manager import (
     list_themes, apply_theme, get_theme_raw_text, get_themes_help_text
 )
 from ..widgets.confirm_dialog import ConfirmDialog
+from ..widgets.status import StatusMixin
 
 
-class ThemesScreen(Static):
+class ThemesScreen(StatusMixin, Static):
     """Browse and apply Alacritty color themes."""
+
+    STATUS_WIDGET_ID = "themes-status"
 
     BINDINGS = [
         Binding("a",  "apply_theme",    "Apply",   show=True),
@@ -64,19 +67,33 @@ class ThemesScreen(Static):
         self._load_themes()
 
     def on_show(self) -> None:
-        self._load_themes()
+        # G2: silent re-read on screen show so we don't spray a "Found N
+        # themes" toast every time the user navigates to this tab.
+        self._reload_view()
 
     def _load_themes(self) -> None:
-        """Scan for themes and populate the list."""
+        """Full init — scan themes, populate the list, announce. on_mount only."""
+        self._reload_view()
+        # Passive mount-time hint — status line only, no startup popup.
+        if self._themes:
+            self._set_status(
+                f"Found {len(self._themes)} theme(s) in ~/.config/alacritty/themes",
+                "ok", popup=False,
+            )
+        else:
+            self._set_status(
+                "No themes found. Press H for installation help.",
+                "warn", popup=False,
+            )
+
+    def _reload_view(self) -> None:
+        """Silent re-read — populate list, no status emission."""
         self._themes = list_themes()
         lv = self.query_one("#themes-list", ListView)
         lv.clear()
 
         if not self._themes:
             lv.append(ListItem(Label("  No themes found in ~/.config/alacritty/themes/")))
-            self._update_status(
-                "[yellow]No themes found. Press H for installation help.[/]"
-            )
             self.query_one("#theme-detail", Static).update(
                 "[#6c7086]No themes installed.\n\n"
                 "Press [bold #89b4fa]H[/] to open the installation guide.[/]"
@@ -92,11 +109,6 @@ class ThemesScreen(Static):
                     f"  [#6c7086]{count} colors detected[/]"
                 )
             ))
-
-        self._update_status(
-            f"[green]Found {len(self._themes)} theme(s) in "
-            f"~/.config/alacritty/themes[/]"
-        )
 
         # Show first theme detail
         if self._themes:
@@ -180,7 +192,7 @@ class ThemesScreen(Static):
     def action_apply_theme(self) -> None:
         """Apply the selected theme after confirmation."""
         if not self._themes:
-            self._update_status("[yellow]No themes available.[/]")
+            self._set_status("No themes available.", "warn")
             return
 
         idx = self._selected_index
@@ -191,14 +203,17 @@ class ThemesScreen(Static):
 
         def on_confirm(confirmed: bool) -> None:
             if not confirmed:
-                self._update_status("Apply cancelled.")
+                self._set_status("Apply cancelled.", "info")
                 return
             ok, msg = apply_theme(theme["path"])
             if ok:
-                self._update_status(f"[green]✔  {msg}[/]")
-                self._load_themes()
+                # _reload_view() (not _load_themes) so the success status
+                # below isn't briefly flashed-over by the "Found N themes"
+                # passive hint that _load_themes would emit.
+                self._reload_view()
+                self._set_status(msg, "ok")
             else:
-                self._update_status(f"[red]✖  {msg}[/]")
+                self._set_status(msg, "error")
 
         self.app.push_screen(
             ConfirmDialog(
@@ -210,8 +225,8 @@ class ThemesScreen(Static):
 
     def action_refresh(self) -> None:
         """Rescan themes directory."""
-        self._load_themes()
-        self._update_status("Theme list refreshed.")
+        self._reload_view()
+        self._set_status("Theme list refreshed.", "info")
 
     def action_toggle_help(self) -> None:
         """Toggle the installation help overlay."""
@@ -225,15 +240,10 @@ class ThemesScreen(Static):
                 "[bold #f9e2af]Theme Installation Guide[/]\n"
                 "[#6c7086]Press H again to return to theme browser.[/]"
             )
-            self._update_status("[yellow]Showing installation help. Press H to close.[/]")
+            self._set_status("Showing installation help. Press H to close.", "warn")
         else:
             if self._themes:
                 self._show_theme_detail(self._selected_index)
-            self._update_status("Returned to theme browser.")
+            self._set_status("Returned to theme browser.", "info")
 
-    def _update_status(self, msg: str) -> None:
-        """Update the status label."""
-        try:
-            self.query_one("#themes-status", Label).update(msg)
-        except Exception:
-            pass
+    # _set_status is provided by StatusMixin (v0.1.1 G2 — unified feedback).

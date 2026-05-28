@@ -12,10 +12,13 @@ from ..font_manager import (
     get_font_settings, apply_font_setting, list_system_fonts
 )
 from ..widgets.confirm_dialog import ConfirmDialog
+from ..widgets.status import StatusMixin
 
 
-class FontsScreen(Static):
+class FontsScreen(StatusMixin, Static):
     """View and edit Alacritty font settings."""
+
+    STATUS_WIDGET_ID = "fonts-status"
 
     BINDINGS = [
         Binding("e", "edit_selected", "Edit",    show=True),
@@ -56,7 +59,9 @@ class FontsScreen(Static):
                     "Pending edits are saved together when you press S",
                     classes="status-muted"
                 )
-                yield Label("", id="font-save-status")
+                # G2 / A6: removed the redundant #font-save-status Label —
+                # the unified status goes to #fonts-status (in the left
+                # panel) plus a toast. No more dual writes of the same msg.
 
                 # System fonts hint
                 yield Label(
@@ -79,7 +84,8 @@ class FontsScreen(Static):
         """Full init — clears pending, reloads, announces. Used by on_mount."""
         self._pending = {}
         self._reload_view()
-        self._update_status("Font settings loaded.")
+        # Passive mount-time hint — status line only (G2: avoid startup spray).
+        self._set_status("Font settings loaded.", "info", popup=False)
 
     def _reload_view(self) -> None:
         """Silent re-read from disk. Preserves _pending and selection."""
@@ -188,12 +194,12 @@ class FontsScreen(Static):
             self.action_edit_selected()
         elif event.button.id == "btn-clear":
             self._pending = {}
-            self._update_status("Pending edits cleared.")
+            self._set_status("Pending edits cleared.", "info")
 
     def action_edit_selected(self) -> None:
         """Stage the current input as a pending edit."""
         if self._selected_index >= len(self._settings):
-            self._update_status("[yellow]Select a setting first.[/]")
+            self._set_status("Select a setting first.", "warn")
             return
 
         s   = self._settings[self._selected_index]
@@ -201,27 +207,27 @@ class FontsScreen(Static):
 
         ok, msg = self._validate(raw, s["type"])
         if not ok:
-            self._update_status(f"[red]✖  {msg}[/]")
+            self._set_status(msg, "error")
             return
 
         self._pending[s["key"]] = raw
-        self._update_status(
-            f"[yellow]Staged: {s['label']} = {raw!r}  "
-            f"({len(self._pending)} pending)[/]"
+        self._set_status(
+            f"Staged: {s['label']} = {raw!r}  ({len(self._pending)} pending)",
+            "warn",
         )
         self._show_detail(self._selected_index)
 
     def action_save_changes(self) -> None:
         """Save all pending edits after confirmation."""
         if not self._pending:
-            self._update_status("[yellow]No pending changes to save.[/]")
+            self._set_status("No pending changes to save.", "warn")
             return
 
         count = len(self._pending)
 
         def on_confirm(confirmed: bool) -> None:
             if not confirmed:
-                self._update_status("Save cancelled.")
+                self._set_status("Save cancelled.", "info")
                 return
 
             errors = []
@@ -231,17 +237,13 @@ class FontsScreen(Static):
                     errors.append(msg)
 
             if errors:
-                self._update_status(
-                    f"[red]✖  Errors: {' | '.join(errors)}[/]"
-                )
+                self._set_status(f"Errors: {' | '.join(errors)}", "error")
             else:
                 self._pending = {}
                 # _reload_view() so the success status below isn't briefly
                 # flashed-over by _load_settings's "Font settings loaded." hint.
                 self._reload_view()
-                self._update_status(
-                    f"[green]✔  Saved {count} font setting(s).[/]"
-                )
+                self._set_status(f"Saved {count} font setting(s).", "ok")
 
         self.app.push_screen(
             ConfirmDialog(
@@ -254,7 +256,7 @@ class FontsScreen(Static):
     def action_refresh(self) -> None:
         """Reload from disk — preserves staged pending edits (G1)."""
         self._reload_view()
-        self._update_status("Refreshed from disk.")
+        self._set_status("Refreshed from disk.", "info")
 
     def _validate(self, raw: str, typ: str) -> tuple[bool, str]:
         """Quick type validation for display purposes."""
@@ -278,10 +280,6 @@ class FontsScreen(Static):
                 return False, "Expected a decimal number (e.g. 12.0)"
         return True, ""
 
-    def _update_status(self, msg: str) -> None:
-        """Update status label."""
-        try:
-            self.query_one("#fonts-status", Label).update(msg)
-            self.query_one("#font-save-status", Label).update(msg)
-        except Exception:
-            pass
+    # _set_status is provided by StatusMixin (v0.1.1 G2 — unified feedback;
+    # also closes A6: the old _update_status wrote the same message to both
+    # #fonts-status and the now-removed #font-save-status label).

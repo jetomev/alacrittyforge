@@ -14,10 +14,13 @@ from ..config_manager import (
 )
 from ..backup_manager import create_backup
 from ..widgets.confirm_dialog import ConfirmDialog
+from ..widgets.status import StatusMixin
 
 
-class ConfigEditorScreen(Static):
+class ConfigEditorScreen(StatusMixin, Static):
     """Browse and edit all settings in alacritty.toml."""
+
+    STATUS_WIDGET_ID = "status-msg"
 
     BINDINGS = [
         Binding("e", "edit_selected",  "Edit",    show=True),
@@ -86,7 +89,10 @@ class ConfigEditorScreen(Static):
         """
         self._pending = {}
         self._reload_view()
-        self._update_status("Config loaded. Select a key to view details.")
+        # Passive mount-time hint — status line only (G2: avoid startup spray).
+        self._set_status(
+            "Config loaded. Select a key to view details.", "info", popup=False,
+        )
 
     def _reload_view(self) -> None:
         """Silent re-read from disk. Preserves _pending and selection."""
@@ -182,11 +188,11 @@ class ConfigEditorScreen(Static):
             self.action_edit_selected()
         elif event.button.id == "btn-clear":
             self._pending = {}
-            self._update_status("Pending edits cleared.")
+            self._set_status("Pending edits cleared.", "info")
 
     def action_edit_selected(self) -> None:
         if not self._selected_key:
-            self._update_status("[yellow]Select a setting first.[/]")
+            self._set_status("Select a setting first.", "warn")
             return
 
         setting = next(
@@ -194,34 +200,35 @@ class ConfigEditorScreen(Static):
             None
         )
         if not setting or not setting["editable"]:
-            self._update_status(
-                "[yellow]This setting cannot be edited here.[/]"
+            self._set_status(
+                "This setting cannot be edited here.", "warn",
             )
             return
 
         raw = self.query_one("#edit-input", Input).value
         ok, coerced, error = validate_value(self._selected_key, raw)
         if not ok:
-            self._update_status(f"[red]✖  {error}[/]")
+            self._set_status(error, "error")
             return
 
         self._pending[self._selected_key] = coerced
-        self._update_status(
-            f"[yellow]Staged: {self._selected_key} = {coerced}  "
-            f"({len(self._pending)} pending)[/]"
+        self._set_status(
+            f"Staged: {self._selected_key} = {coerced}  "
+            f"({len(self._pending)} pending)",
+            "warn",
         )
         self._update_detail(setting)
 
     def action_save_changes(self) -> None:
         if not self._pending:
-            self._update_status("[yellow]No pending changes to save.[/]")
+            self._set_status("No pending changes to save.", "warn")
             return
 
         count = len(self._pending)
 
         def on_confirm(confirmed: bool) -> None:
             if not confirmed:
-                self._update_status("Save cancelled.")
+                self._set_status("Save cancelled.", "info")
                 return
             create_backup(note="pre-config-edit")
             data = load_config()
@@ -233,13 +240,11 @@ class ConfigEditorScreen(Static):
                 # below isn't briefly flashed-over by the "Config loaded…"
                 # mount-time hint that _load_settings would emit.
                 self._reload_view()
-                self._update_status(
-                    f"[green]✔  Saved {count} change(s) to alacritty.toml[/]"
+                self._set_status(
+                    f"Saved {count} change(s) to alacritty.toml", "ok",
                 )
             else:
-                self._update_status(
-                    "[red]✖  Failed to write config file.[/]"
-                )
+                self._set_status("Failed to write config file.", "error")
 
         self.app.push_screen(
             ConfirmDialog(
@@ -252,10 +257,7 @@ class ConfigEditorScreen(Static):
     def action_refresh(self) -> None:
         # _reload_view() so a user-initiated R doesn't drop staged edits.
         self._reload_view()
-        self._update_status("Refreshed from disk.")
+        self._set_status("Refreshed from disk.", "info")
 
-    def _update_status(self, msg: str) -> None:
-        try:
-            self.query_one("#status-msg", Label).update(msg)
-        except Exception:
-            pass
+    # _set_status is provided by StatusMixin (v0.1.1 G2 — unified feedback:
+    # in-screen status line + app-level notify popup).

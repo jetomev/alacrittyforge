@@ -4,6 +4,7 @@
 # ═══════════════════════════════════════════════════════════
 
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.widgets import Label, Static
 from textual.containers import Vertical, Horizontal
 
@@ -12,10 +13,18 @@ from ..config_manager import (
     get_active_theme, get_font_name, get_font_size, get_opacity
 )
 from ..backup_manager import get_backup_count, BACKUP_DIR, CONFIG_PATH
+from ..widgets.status import StatusMixin
 
 
-class DashboardScreen(Static):
+class DashboardScreen(StatusMixin, Static):
     """Home screen showing Alacritty config status and overview."""
+
+    # No in-screen status line; R feedback surfaces as a toast (G2).
+    STATUS_WIDGET_ID = None
+
+    BINDINGS = [
+        Binding("r", "refresh", "Refresh", show=True),
+    ]
 
     def compose(self) -> ComposeResult:
         with Vertical(classes="main-area"):
@@ -31,6 +40,14 @@ class DashboardScreen(Static):
             self.query_one("#dashboard-content", _DashboardContent).refresh_data()
         except Exception:
             pass
+
+    def action_refresh(self) -> None:
+        try:
+            self.query_one("#dashboard-content", _DashboardContent).refresh_data()
+        except Exception:
+            pass
+        # No status line here — popup-only feedback (mirrors grubForge F10).
+        self._set_status("Dashboard refreshed.", "info")
 
 
 class _DashboardContent(Static):

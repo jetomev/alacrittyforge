@@ -13,10 +13,13 @@ from ..keybind_manager import (
     format_binding_display, AVAILABLE_ACTIONS, AVAILABLE_MODS
 )
 from ..widgets.confirm_dialog import ConfirmDialog
+from ..widgets.status import StatusMixin
 
 
-class KeyBindingsScreen(Static):
+class KeyBindingsScreen(StatusMixin, Static):
     """View and manage Alacritty keyboard bindings."""
+
+    STATUS_WIDGET_ID = "keys-status"
 
     BINDINGS = [
         Binding("n",  "new_binding",    "New",     show=True),
@@ -76,17 +79,33 @@ class KeyBindingsScreen(Static):
                     yield Button("Add Binding",  id="btn-add",    classes="primary")
                     yield Button("Clear",        id="btn-clear",  classes="warning")
                     yield Button("Delete",       id="btn-delete", classes="danger")
-
-                yield Label("", id="keys-add-status")
+                # G2 / A6: removed the redundant #keys-add-status Label —
+                # add/delete feedback now routes through the unified
+                # #keys-status + toast pop.
 
     def on_mount(self) -> None:
         self._load_bindings()
 
     def on_show(self) -> None:
-        self._load_bindings()
+        # G2: silent reload — no toast on every screen switch.
+        self._reload_view()
 
     def _load_bindings(self) -> None:
-        """Load all bindings and populate the table."""
+        """Full init — reload, announce. Used by on_mount."""
+        self._reload_view()
+        user_count = sum(
+            1 for b in self._bindings_data if b.get("source") == "user"
+        )
+        # Passive mount-time hint — status line only.
+        self._set_status(
+            f"{len(self._bindings_data)} bindings total  "
+            f"({user_count} user-defined, "
+            f"{len(self._bindings_data) - user_count} defaults)",
+            "info", popup=False,
+        )
+
+    def _reload_view(self) -> None:
+        """Silent reload — populate the table, no status emission."""
         self._bindings_data = get_all_bindings()
 
         table = self.query_one("#keys-table", DataTable)
@@ -101,15 +120,6 @@ class KeyBindingsScreen(Static):
                 else "[#6c7086]default[/]"
             )
             table.add_row(source_label, key, mods, action)
-
-        user_count = sum(
-            1 for b in self._bindings_data if b.get("source") == "user"
-        )
-        self._update_status(
-            f"[#cdd6f4]{len(self._bindings_data)} bindings total  "
-            f"([green]{user_count} user-defined[/]  "
-            f"[#6c7086]{len(self._bindings_data) - user_count} defaults[/])[/]"
-        )
 
     def on_data_table_row_highlighted(
         self, event: DataTable.RowHighlighted
@@ -179,15 +189,18 @@ class KeyBindingsScreen(Static):
 
         def on_confirm(confirmed: bool) -> None:
             if not confirmed:
-                self._update_add_status("Add cancelled.")
+                self._set_status("Add cancelled.", "info")
                 return
             ok, msg = add_binding(key, mods, action, chars)
             if ok:
-                self._update_add_status(f"[green]✔  {msg}[/]")
                 self._clear_inputs()
-                self._load_bindings()
+                # _reload_view() (not _load_bindings) so the success status
+                # below isn't briefly flashed-over by the "N bindings total"
+                # passive hint that _load_bindings would emit.
+                self._reload_view()
+                self._set_status(msg, "ok")
             else:
-                self._update_add_status(f"[red]✖  {msg}[/]")
+                self._set_status(msg, "error")
 
         self.app.push_screen(
             ConfirmDialog(
@@ -201,13 +214,13 @@ class KeyBindingsScreen(Static):
         """Delete the selected user binding."""
         idx = self._selected_index
         if idx >= len(self._bindings_data):
-            self._update_add_status("[yellow]Select a binding first.[/]")
+            self._set_status("Select a binding first.", "warn")
             return
 
         b = self._bindings_data[idx]
         if b.get("source") != "user":
-            self._update_add_status(
-                "[yellow]Only user-defined bindings can be deleted.[/]"
+            self._set_status(
+                "Only user-defined bindings can be deleted.", "warn",
             )
             return
 
@@ -222,21 +235,23 @@ class KeyBindingsScreen(Static):
             None
         )
         if user_idx is None:
-            self._update_add_status("[red]Could not locate binding.[/]")
+            self._set_status("Could not locate binding.", "error")
             return
 
         key, mods, action = format_binding_display(b)
 
         def on_confirm(confirmed: bool) -> None:
             if not confirmed:
-                self._update_add_status("Delete cancelled.")
+                self._set_status("Delete cancelled.", "info")
                 return
             ok, msg = delete_binding(user_idx)
             if ok:
-                self._update_add_status(f"[green]✔  {msg}[/]")
-                self._load_bindings()
+                # _reload_view() so the success status isn't briefly flashed-
+                # over by the "N bindings total" passive hint.
+                self._reload_view()
+                self._set_status(msg, "ok")
             else:
-                self._update_add_status(f"[red]✖  {msg}[/]")
+                self._set_status(msg, "error")
 
         self.app.push_screen(
             ConfirmDialog(
@@ -248,22 +263,14 @@ class KeyBindingsScreen(Static):
 
     def action_refresh(self) -> None:
         """Reload bindings from disk."""
-        self._load_bindings()
-        self._update_status("Refreshed.")
+        self._reload_view()
+        self._set_status("Refreshed.", "info")
 
     def _clear_inputs(self) -> None:
         """Clear all add-binding input fields."""
         self.query_one("#input-key",   Input).value = ""
         self.query_one("#input-chars", Input).value = ""
 
-    def _update_status(self, msg: str) -> None:
-        try:
-            self.query_one("#keys-status", Label).update(msg)
-        except Exception:
-            pass
-
-    def _update_add_status(self, msg: str) -> None:
-        try:
-            self.query_one("#keys-add-status", Label).update(msg)
-        except Exception:
-            pass
+    # _set_status is provided by StatusMixin (v0.1.1 G2 — unified feedback;
+    # also collapses the prior _update_status / _update_add_status split into
+    # one channel: status line + toast).
