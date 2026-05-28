@@ -72,13 +72,26 @@ class ConfigEditorScreen(Static):
         self._load_settings()
 
     def on_show(self) -> None:
-        self._load_settings()
+        # G1 (A1): silent re-read so pending edits aren't clobbered on screen
+        # switch. on_show used to call _load_settings(), which resets _pending
+        # to {} — meaning if you staged an edit, switched to the Dashboard,
+        # and came back, your stage was silently gone.
+        self._reload_view()
 
     def _load_settings(self) -> None:
-        """Load settings from disk and populate the table."""
+        """Full init — clears any pending edits, reloads, announces.
+
+        Used by on_mount and as a hard-reset path. on_show / action_refresh /
+        post-save use _reload_view() instead so staged edits survive.
+        """
+        self._pending = {}
+        self._reload_view()
+        self._update_status("Config loaded. Select a key to view details.")
+
+    def _reload_view(self) -> None:
+        """Silent re-read from disk. Preserves _pending and selection."""
         data = self._data = load_config()
         self._settings = get_flat_settings(data)
-        self._pending = {}
 
         table = self.query_one("#settings-table", DataTable)
         table.clear(columns=True)
@@ -91,7 +104,16 @@ class ConfigEditorScreen(Static):
             table.add_row(s["key"], val_str)
 
         self.query_one("#raw-preview", Static).update(get_raw_text())
-        self._update_status("Config loaded. Select a key to view details.")
+
+        # Re-render the detail panel for the selected key so any pending
+        # edit (and the Pending: badge) stays visible after the reload.
+        if self._selected_key:
+            setting = next(
+                (s for s in self._settings if s["key"] == self._selected_key),
+                None,
+            )
+            if setting:
+                self._update_detail(setting)
 
     def on_data_table_row_highlighted(
         self, event: DataTable.RowHighlighted
@@ -207,7 +229,10 @@ class ConfigEditorScreen(Static):
                 set_nested_value(data, key, value)
             if save_config(data):
                 self._pending = {}
-                self._load_settings()
+                # _reload_view() (not _load_settings) so the success status
+                # below isn't briefly flashed-over by the "Config loaded…"
+                # mount-time hint that _load_settings would emit.
+                self._reload_view()
                 self._update_status(
                     f"[green]✔  Saved {count} change(s) to alacritty.toml[/]"
                 )
@@ -225,7 +250,8 @@ class ConfigEditorScreen(Static):
         )
 
     def action_refresh(self) -> None:
-        self._load_settings()
+        # _reload_view() so a user-initiated R doesn't drop staged edits.
+        self._reload_view()
         self._update_status("Refreshed from disk.")
 
     def _update_status(self, msg: str) -> None:

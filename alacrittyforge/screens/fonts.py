@@ -71,12 +71,19 @@ class FontsScreen(Static):
         self._load_system_fonts()
 
     def on_show(self) -> None:
-        self._load_settings()
+        # G1 (A1): silent re-read so pending edits aren't clobbered on screen
+        # switch. on_show used to call _load_settings(), which resets _pending.
+        self._reload_view()
 
     def _load_settings(self) -> None:
-        """Load font settings from disk and populate table."""
+        """Full init — clears pending, reloads, announces. Used by on_mount."""
+        self._pending = {}
+        self._reload_view()
+        self._update_status("Font settings loaded.")
+
+    def _reload_view(self) -> None:
+        """Silent re-read from disk. Preserves _pending and selection."""
         self._settings = get_font_settings()
-        self._pending  = {}
 
         table = self.query_one("#fonts-table", DataTable)
         table.clear(columns=True)
@@ -86,7 +93,10 @@ class FontsScreen(Static):
             val_str = str(s["value"]) if s["value"] not in (None, "") else "—"
             table.add_row(s["label"], val_str)
 
-        self._update_status("Font settings loaded.")
+        # Re-render the detail panel for the current selection so any pending
+        # edit stays visible after the reload.
+        if self._selected_index < len(self._settings):
+            self._show_detail(self._selected_index)
 
     def _load_system_fonts(self) -> None:
         """List available system fonts in the side panel."""
@@ -226,7 +236,9 @@ class FontsScreen(Static):
                 )
             else:
                 self._pending = {}
-                self._load_settings()
+                # _reload_view() so the success status below isn't briefly
+                # flashed-over by _load_settings's "Font settings loaded." hint.
+                self._reload_view()
                 self._update_status(
                     f"[green]✔  Saved {count} font setting(s).[/]"
                 )
@@ -240,8 +252,8 @@ class FontsScreen(Static):
         )
 
     def action_refresh(self) -> None:
-        """Reload from disk."""
-        self._load_settings()
+        """Reload from disk — preserves staged pending edits (G1)."""
+        self._reload_view()
         self._update_status("Refreshed from disk.")
 
     def _validate(self, raw: str, typ: str) -> tuple[bool, str]:
