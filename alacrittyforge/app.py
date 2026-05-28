@@ -13,6 +13,7 @@ from .screens.config_editor import ConfigEditorScreen
 from .screens.themes import ThemesScreen
 from .screens.fonts import FontsScreen
 from .screens.keybindings import KeyBindingsScreen
+from .widgets.help_screen import HelpScreen
 
 
 class AlacrittyForge(App):
@@ -92,79 +93,13 @@ class AlacrittyForge(App):
                 pass
 
     def action_show_help(self) -> None:
-        """Show a help overlay with all keybindings."""
-        from textual.widgets import Label
-        from textual.screen import ModalScreen
-        from textual.app import ComposeResult
-        from textual.containers import Vertical
-        from textual.widgets import Button
+        """Toggle the help overlay.
 
-        class HelpScreen(ModalScreen):
-            DEFAULT_CSS = """
-            HelpScreen {
-                align: center middle;
-            }
-            HelpScreen > Vertical {
-                background: #181825;
-                border: solid #cba6f7;
-                padding: 2 4;
-                width: 70;
-                height: auto;
-            }
-            HelpScreen .help-title {
-                color: #cba6f7;
-                text-style: bold;
-                text-align: center;
-                margin-bottom: 1;
-            }
-            HelpScreen .help-line {
-                color: #cdd6f4;
-            }
-            HelpScreen .help-key {
-                color: #89b4fa;
-            }
-            HelpScreen .help-section {
-                color: #f9e2af;
-                text-style: bold;
-                margin-top: 1;
-            }
-            """
-
-            BINDINGS = [
-                Binding("escape", "dismiss", "Close"),
-                Binding("q",      "dismiss", "Close"),
-            ]
-
-            def compose(self) -> ComposeResult:
-                with Vertical():
-                    yield Label("⚡ AlacrittyForge — Help", classes="help-title")
-                    yield Label("── Global ──────────────────────────────", classes="help-section")
-                    yield Label("  1-5    Switch screens",         classes="help-line")
-                    yield Label("  q      Quit",                   classes="help-line")
-                    yield Label("  ?      This help screen",       classes="help-line")
-                    yield Label("── Config Editor ───────────────────────", classes="help-section")
-                    yield Label("  E      Edit selected value",    classes="help-line")
-                    yield Label("  S      Save all changes",       classes="help-line")
-                    yield Label("  R      Refresh from disk",      classes="help-line")
-                    yield Label("── Themes ──────────────────────────────", classes="help-section")
-                    yield Label("  A      Apply selected theme",   classes="help-line")
-                    yield Label("  F5     Refresh theme list",     classes="help-line")
-                    yield Label("  H      Toggle install guide",   classes="help-line")
-                    yield Label("── Fonts ───────────────────────────────", classes="help-section")
-                    yield Label("  E      Edit selected value",    classes="help-line")
-                    yield Label("  S      Save all changes",       classes="help-line")
-                    yield Label("  R      Refresh from disk",      classes="help-line")
-                    yield Label("── Key Bindings ────────────────────────", classes="help-section")
-                    yield Label("  N      New binding",            classes="help-line")
-                    yield Label("  D      Delete selected",        classes="help-line")
-                    yield Label("  R      Refresh",                classes="help-line")
-                    yield Label("── Backup (in Config Editor) ───────────", classes="help-section")
-                    yield Label("  Backups created automatically", classes="help-line")
-                    yield Label("  before every save.",            classes="help-line")
-                    yield Label("", classes="help-line")
-                    yield Label("  Press Escape or Q to close",    classes="help-section")
-
-            def action_dismiss(self) -> None:
-                self.app.pop_screen()
-
-        self.push_screen(HelpScreen())
+        A2: previously this always push_screen'd a fresh HelpScreen, so
+        pressing ? twice stacked two modals. Now it toggles — if the top
+        screen is already a HelpScreen, pop it; otherwise push.
+        """
+        if isinstance(self.screen, HelpScreen):
+            self.pop_screen()
+        else:
+            self.push_screen(HelpScreen())
