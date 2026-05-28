@@ -19,6 +19,8 @@ class ThemesScreen(StatusMixin, Static):
     """Browse and apply Alacritty color themes."""
 
     STATUS_WIDGET_ID = "themes-status"
+    # G4: focused on show so A/F5/H fire on entry without a panel click.
+    DEFAULT_FOCUS = "#themes-list"
 
     BINDINGS = [
         Binding("a",  "apply_theme",    "Apply",   show=True),

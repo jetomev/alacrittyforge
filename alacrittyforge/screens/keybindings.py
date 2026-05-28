@@ -20,6 +20,8 @@ class KeyBindingsScreen(StatusMixin, Static):
     """View and manage Alacritty keyboard bindings."""
 
     STATUS_WIDGET_ID = "keys-status"
+    # G4: focused on show so N/D/R fire on entry without a panel click.
+    DEFAULT_FOCUS = "#keys-table"
 
     BINDINGS = [
         Binding("n",  "new_binding",    "New",     show=True),

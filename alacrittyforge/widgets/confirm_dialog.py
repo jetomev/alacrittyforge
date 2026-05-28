@@ -4,6 +4,7 @@
 # ═══════════════════════════════════════════════════════════
 
 from textual.app import ComposeResult
+from textual.binding import Binding
 from textual.screen import ModalScreen
 from textual.widgets import Button, Label
 from textual.containers import Vertical, Horizontal
@@ -11,6 +12,13 @@ from textual.containers import Vertical, Horizontal
 
 class ConfirmDialog(ModalScreen[bool]):
     """A modal confirmation dialog that returns True (confirm) or False (cancel)."""
+
+    # A5: Esc cancels and Enter confirms — keyboard-only users no longer
+    # have to Tab+Space onto a Button to dismiss the dialog.
+    BINDINGS = [
+        Binding("escape", "cancel",  "Cancel"),
+        Binding("enter",  "confirm", "Confirm"),
+    ]
 
     DEFAULT_CSS = """
     ConfirmDialog {
@@ -62,3 +70,9 @@ class ConfirmDialog(ModalScreen[bool]):
             self.dismiss(True)
         else:
             self.dismiss(False)
+
+    def action_cancel(self) -> None:
+        self.dismiss(False)
+
+    def action_confirm(self) -> None:
+        self.dismiss(True)

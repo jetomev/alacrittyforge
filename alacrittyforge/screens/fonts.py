@@ -19,6 +19,8 @@ class FontsScreen(StatusMixin, Static):
     """View and edit Alacritty font settings."""
 
     STATUS_WIDGET_ID = "fonts-status"
+    # G4: focused on show so E/S/R fire on entry without a panel click.
+    DEFAULT_FOCUS = "#fonts-table"
 
     BINDINGS = [
         Binding("e", "edit_selected", "Edit",    show=True),

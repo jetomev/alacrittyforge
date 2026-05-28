@@ -63,13 +63,30 @@ class AlacrittyForge(App):
         self.query_one("#content", ContentSwitcher).current = screen_id
         self._update_nav(screen_id)
 
-        # Notify the active screen to refresh its data
         try:
             screen = self.query_one(f"#{screen_id}")
-            if hasattr(screen, "on_show"):
-                screen.on_show()
         except Exception:
-            pass
+            return
+
+        # Notify the active screen to refresh its data.
+        if hasattr(screen, "on_show"):
+            try:
+                screen.on_show()
+            except Exception:
+                pass
+
+        # G4 (A4): focus the screen's primary widget so its key bindings
+        # (E/S/R on Config Editor, A/F5/H on Themes, E/S/R on Fonts,
+        # N/D/R on Key Bindings) fire immediately on screen entry without
+        # needing a click into the panel first. ContentSwitcher doesn't
+        # move focus on its own; without this, those keys are inert until
+        # the user clicks the table/list.
+        focus_id = getattr(screen, "DEFAULT_FOCUS", None)
+        if focus_id:
+            try:
+                self.query_one(focus_id).focus()
+            except Exception:
+                pass
 
     def _update_nav(self, active_id: str) -> None:
         """Update sidebar nav item highlight."""

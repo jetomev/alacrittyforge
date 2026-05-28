@@ -21,6 +21,8 @@ class ConfigEditorScreen(StatusMixin, Static):
     """Browse and edit all settings in alacritty.toml."""
 
     STATUS_WIDGET_ID = "status-msg"
+    # G4: focused on show so E/S/R fire on entry without a panel click.
+    DEFAULT_FOCUS = "#settings-table"
 
     BINDINGS = [
         Binding("e", "edit_selected",  "Edit",    show=True),
