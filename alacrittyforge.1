@@ -1,0 +1,121 @@
+.\" alacrittyforge.1 — alacrittyForge man page
+.\" GNU GPL v3 — see LICENSE
+.TH ALACRITTYFORGE 1 "May 2026" "alacrittyForge v0.1.1" "User Commands"
+.
+.SH NAME
+alacrittyforge \- terminal UI for managing Alacritty configuration
+.
+.SH SYNOPSIS
+.B alacrittyforge
+.
+.SH DESCRIPTION
+.B alacrittyForge
+is a Catppuccin Mocha–themed terminal UI for viewing, editing, and backing up
+the Alacritty terminal emulator's TOML configuration. It writes only to your
+user-space config at
+.IR ~/.config/alacritty/alacritty.toml ,
+with timestamped backups in
+.IR ~/.config/alacritty/backups/ ;
+no root privileges are required.
+
+The application is organized around five screens, switchable from the sidebar
+or with the number keys:
+.TP
+.B 1 — Dashboard
+System overview: config status, active theme, font, opacity, backup count.
+.TP
+.B 2 — Config Editor
+Browse and edit all alacritty.toml settings with live validation.
+.TP
+.B 3 — Themes
+Browse, preview, and apply installed Alacritty color themes.
+.TP
+.B 4 — Fonts
+View and edit font family / style / size with a side panel of system fonts.
+.TP
+.B 5 — Key Bindings
+View default + user-defined bindings, add custom bindings, delete user ones.
+.
+.SH KEYBINDINGS
+.SS Global (any screen)
+.TP
+.B 1 .. 5
+Switch to the corresponding screen.
+.TP
+.B R
+Refresh the current screen's view from disk.
+.TP
+.B ?
+Toggle the help overlay (press again, or Esc, q, or ? to close).
+.TP
+.B q
+Quit.
+.
+.SS Config Editor and Fonts
+.TP
+.B E
+Edit the selected value (focuses the input).
+.TP
+.B S
+Save all pending changes (with confirmation; auto-backs-up first).
+.
+.SS Themes
+.TP
+.B A
+Apply the selected theme (with confirmation).
+.TP
+.B F5
+Rescan the themes directory.
+.TP
+.B H
+Toggle the theme installation guide.
+.
+.SS Key Bindings
+.TP
+.B N
+Add a new binding from the input fields.
+.TP
+.B D
+Delete the selected user-defined binding.
+.
+.SH SAFETY
+Every write to
+.I alacritty.toml
+goes through three layers:
+.IP \(bu 2
+.B Validation
+— input is checked before being staged.
+.IP \(bu 2
+.B Confirmation
+— a modal dialog asks before any disk write (Esc cancels, Enter confirms).
+.IP \(bu 2
+.B Backup
+— a timestamped copy of the current config is written to
+.I ~/.config/alacritty/backups/
+before every modification. Up to 20 backups are kept (FIFO).
+.
+.SH FILES
+.TP
+.I ~/.config/alacritty/alacritty.toml
+Alacritty's user configuration file. alacrittyForge reads and writes here.
+.TP
+.I ~/.config/alacritty/backups/
+Timestamped auto-backups created before every write.
+.TP
+.I ~/.config/alacritty/themes/
+Directory scanned for installed color themes.
+.
+.SH AUTHORS
+Co-developed by Javier
+.RB ( jetomev )
+and Claude (Anthropic). alacrittyForge is part of the
+.B Forge
+suite (alongside grubForge) that ships with KognogOS.
+.
+.SH COPYRIGHT
+Copyright \(co 2026 Javier (jetomev). License: GNU GPL v3. This is free software;
+see the source for copying conditions. There is NO warranty.
+.
+.SH SEE ALSO
+.BR alacritty (1),
+.BR grubforge (1)

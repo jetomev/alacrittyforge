@@ -6,7 +6,8 @@
 ![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
 ![Python: 3.11+](https://img.shields.io/badge/Python-3.11+-green.svg)
 ![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-purple.svg)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-purple.svg)
+[![AUR](https://img.shields.io/aur/version/alacrittyforge)](https://aur.archlinux.org/packages/alacrittyforge)
 
 ---
 
@@ -59,11 +60,18 @@ emulators also one of the most unfriendly experiences on Linux? It doesn't have 
 
 ## Installation
 
-### Arch Linux (recommended)
+### Arch Linux — AUR (recommended)
+```bash
+yay -S alacrittyforge
+```
+Then just run `alacrittyforge`.
+
+### Arch Linux — from source
 ```bash
 sudo pacman -S python-textual python-rich python-tomli-w
 git clone https://github.com/jetomev/alacrittyforge.git
 cd alacrittyforge
+python main.py
 ```
 
 ### Other distributions
@@ -71,6 +79,7 @@ cd alacrittyforge
 pip install textual rich tomli-w
 git clone https://github.com/jetomev/alacrittyforge.git
 cd alacrittyforge
+python main.py
 ```
 
 ---
@@ -176,13 +185,21 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 
 ## Roadmap
 
-### v0.1.0 — Current (Alpha)
+### v0.1.0 — April 2026 (initial alpha)
 - [x] Dashboard with config overview
 - [x] Config editor with live validation
 - [x] Theme browser with color palette preview
 - [x] Font manager with system font listing
 - [x] Key bindings viewer and editor
 - [x] Automatic timestamped backups
+
+### v0.1.1 — Current (hardening + first AUR release)
+- [x] Pending edits survive a screen switch (A1)
+- [x] Unified status-line + toast feedback across all screens (A3, A6)
+- [x] Help modal toggles instead of stacking; Esc/q/? dismiss (A2)
+- [x] Screen bindings fire on entry without a panel click (A4)
+- [x] ConfirmDialog: Esc cancels, Enter confirms (A5)
+- [x] Published on the AUR
 
 ### v0.2.0 — Planned
 - [ ] Dropdown selectors for settings with fixed options (decorations, cursor shape, startup mode, etc.)
@@ -192,13 +209,26 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 - [ ] Backup restore screen
 
 ### Future
-- [ ] AUR package
 - [ ] Live preview of font changes
 - [ ] Import/export config profiles
 
 ---
 
 ## Changelog
+
+### v0.1.1 — May 28, 2026
+**Hardening batch + first AUR release**
+
+Closes 6 findings (A1–A6) from a systematic audit borrowing the grubForge hardening playbook (grubForge is the Forge-suite sibling for the GRUB bootloader). Shipped in four thematic groups:
+
+- 🔒 **G1 — Pending safety + refresh-on-show split** *(A1)*. `on_show()` on Config Editor and Fonts used to call `_load_settings()`, which begins with `self._pending = {}` — so staging an edit, switching screens, and coming back silently wiped the stage. Split into `_reload_view()` (silent re-read; preserves `_pending` and selection) and `_load_settings()` (full reset; used by `on_mount` and as a hard-reset). `on_show` / `action_refresh` / post-save now route through the silent path.
+- 💬 **G2 — Unified feedback surface** *(A3, A6)*. New `widgets/status.py::StatusMixin` provides one `_set_status(msg, level, popup=True)` that writes a colored icon + message to a per-screen status line **and** fires an app-level toast. `popup=False` for passive mount-time hints so the five screens don't spray notifications at app launch. The Dashboard gains an `R` action with toast; redundant duplicate status labels in Fonts (`#font-save-status`) and Key Bindings (`#keys-add-status`) are gone. Icons consolidated to the unicode set used in grubForge: `✓ ● ⚠ ✗`.
+- ❓ **G3 — Help modal hardening** *(A2)*. The help overlay used to be an inline-nested `ModalScreen` class defined inside `action_show_help`, which `push_screen`'d on every keypress — pressing `?` twice stacked two help modals. Extracted to `widgets/help_screen.py`; the app now toggles (pop if already on top, else push). The modal binds `?` itself so a second `?` while open closes it directly; `q` stays bound on the modal so it shadows the app-level quit.
+- 🎯 **G4 — Focus-on-show + ConfirmDialog keys** *(A4, A5)*. Screen bindings used to be inert until the user clicked into a panel — `ContentSwitcher` doesn't move focus on its own. Each action screen now declares `DEFAULT_FOCUS` (`#settings-table`, `#themes-list`, `#fonts-table`, `#keys-table`) and `App.action_show_screen` focuses it after `on_show`. `ConfirmDialog` gains `escape` → cancel, `enter` → confirm so keyboard users don't have to Tab+Space onto a button.
+
+**Packaging:** Published on the AUR (`alacrittyforge`). The PKGBUILD's `check()` step runs a **headless mount** smoke under Textual's `run_test` harness — catches CSS-parse and `on_mount` failures at build time, not just import breaks.
+
+No dependency changes. Same `python`, `python-textual`, `python-rich`, `python-tomli-w`.
 
 ### v0.1.0 — April 6, 2026
 **First Alpha Release**
