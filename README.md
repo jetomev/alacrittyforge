@@ -185,13 +185,16 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 
 ## Roadmap
 
-### v0.1.0 — April 2026 (initial alpha)
-- [x] Dashboard with config overview
-- [x] Config editor with live validation
-- [x] Theme browser with color palette preview
-- [x] Font manager with system font listing
-- [x] Key bindings viewer and editor
-- [x] Automatic timestamped backups
+### Future
+- [ ] Live preview of font changes
+- [ ] Import/export config profiles
+
+### v0.2.0 — Planned
+- [ ] Dropdown selectors for settings with fixed options (decorations, cursor shape, startup mode, etc.)
+- [ ] Scrollable font picker from system fonts list
+- [ ] Color picker for hex color fields
+- [ ] Screenshots in README
+- [ ] Backup restore screen
 
 ### v0.1.1 — Current (hardening + first AUR release)
 - [x] Pending edits survive a screen switch (A1)
@@ -201,16 +204,13 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 - [x] ConfirmDialog: Esc cancels, Enter confirms (A5)
 - [x] Published on the AUR
 
-### v0.2.0 — Planned
-- [ ] Dropdown selectors for settings with fixed options (decorations, cursor shape, startup mode, etc.)
-- [ ] Scrollable font picker from system fonts list
-- [ ] Color picker for hex color fields
-- [ ] Screenshots in README
-- [ ] Backup restore screen
-
-### Future
-- [ ] Live preview of font changes
-- [ ] Import/export config profiles
+### v0.1.0 — April 2026 (initial alpha)
+- [x] Dashboard with config overview
+- [x] Config editor with live validation
+- [x] Theme browser with color palette preview
+- [x] Font manager with system font listing
+- [x] Key bindings viewer and editor
+- [x] Automatic timestamped backups
 
 ---
 
