@@ -9,6 +9,8 @@
 ![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-purple.svg)
 [![AUR](https://img.shields.io/aur/version/alacrittyforge)](https://aur.archlinux.org/packages/alacrittyforge)
 
+> 🛡 **Security:** every release is GPG-signed and every commit GitHub-Verified. Read **[Where We Stand](https://github.com/jetomev/KognogOS/blob/main/docs/where-we-stand.md)** — our response to the 2026 AUR supply-chain attacks, what is current during the AUR freeze, and how to verify us instead of trusting us.
+
 ---
 
 ## Why AlacrittyForge?
