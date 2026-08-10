@@ -1,231 +1,254 @@
 # ═══════════════════════════════════════════════════════════
-#  AlacrittyForge — Config Editor Screen
-#  Browse, edit, and save all alacritty.toml settings.
+#  AlacrittyForge — Config Editor Screen (v0.2.0 redesign)
+#
+#  Javier's ruling: ONE table (Key / Value / Staged), values edited
+#  in place — enumerable keys get an anchored DROPDOWN at the cell
+#  (typos impossible), free-text keys get a small floating editor.
+#  Below the table, a window-style fixed footer (divider + buttons,
+#  always visible regardless of scroll): Apply Edit · Clear Pending ·
+#  Save Changes. No right panel, no section-hopping to write the file.
 # ═══════════════════════════════════════════════════════════
+
+import re
+
+from rich.text import Text
 
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.widgets import Label, Static, DataTable, Input, Button
-from textual.containers import Vertical, Horizontal, ScrollableContainer
+from textual.containers import Horizontal, Vertical, VerticalScroll
+from textual.widgets import Button, DataTable, Input, Label, Static
+
+from forgekit import ConfirmDialog, ForgeModal, MenuDropdown
 
 from ..config_manager import (
     load_config, save_config, get_flat_settings,
-    validate_value, set_nested_value, get_raw_text
+    validate_value, set_nested_value,
 )
 from ..backup_manager import create_backup
-from ..widgets.confirm_dialog import ConfirmDialog
+from ..field_options import get_options
+from ..widgets.picker import FilterPickerModal
 from ..widgets.status import StatusMixin
+
+_HEX_RE = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+def _render_value(val: str) -> Text | str:
+    """Color values get a live swatch square before the hex (finding #5)."""
+    if _HEX_RE.match(val):
+        t = Text()
+        t.append("■ ", style=val)
+        t.append(val)
+        return t
+    return val
+
+
+class FieldEditModal(ForgeModal):
+    """Small floating editor for free-text keys (kit window language)."""
+
+    BINDINGS = [Binding("escape", "cancel", "", show=False)]
+
+    def __init__(self, key: str, current: str, description: str) -> None:
+        super().__init__()
+        self._key, self._current, self._desc = key, current, description
+
+    def compose(self) -> ComposeResult:
+        with Vertical(classes="forge-panel field-edit"):
+            yield Static(f"Edit — {self._key}", classes="forge-panel-title")
+            with VerticalScroll(classes="forge-panel-body"):
+                if self._desc:
+                    yield Static(f"[#a6adc8]{self._desc}[/]")
+                yield Label("New value")
+                yield Input(value=self._current, id="field-input")
+            with Horizontal(classes="forge-buttons forge-panel-footer"):
+                yield Button("Stage", id="stage", variant="primary")
+                yield Button("Cancel", id="cancel")
+
+    def on_mount(self) -> None:
+        self.query_one("#field-input", Input).focus()
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        self.dismiss(event.value)
+
+    def on_button_pressed(self, e: Button.Pressed) -> None:
+        if e.button.id == "stage":
+            self.dismiss(self.query_one("#field-input", Input).value)
+        else:
+            self.dismiss(None)
+
+    def action_cancel(self) -> None:
+        self.dismiss(None)
 
 
 class ConfigEditorScreen(StatusMixin, Static):
-    """Browse and edit all settings in alacritty.toml."""
+    """Single-table config editor with in-place value editing."""
 
     STATUS_WIDGET_ID = "status-msg"
-    # G4: focused on show so E/S/R fire on entry without a panel click.
     DEFAULT_FOCUS = "#settings-table"
 
     BINDINGS = [
-        Binding("e", "edit_selected",  "Edit",    show=True),
-        Binding("s", "save_changes",   "Save",    show=True),
-        Binding("r", "refresh",        "Refresh", show=True),
+        Binding("e",     "edit_selected", "Edit",    show=True),
+        Binding("s",     "save_changes",  "Save",    show=True),
+        Binding("r",     "refresh",       "Refresh", show=True),
     ]
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self._pending: dict = {}
         self._settings: list[dict] = []
-        self._selected_key: str = ""
 
     def compose(self) -> ComposeResult:
-        with Horizontal():
-            # ── Left: settings table ──
-            with Vertical(classes="main-area", id="editor-left"):
-                yield Label(
-                    "🔧  Config Keys  (↑↓ navigate  •  E edit)",
-                    classes="section-title"
-                )
-                yield DataTable(id="settings-table", cursor_type="row")
-
-                yield Label(
-                    "Raw ~/.config/alacritty/alacritty.toml  (read-only preview)",
-                    classes="section-title"
-                )
-                with ScrollableContainer(id="raw-preview-container"):
-                    yield Static(id="raw-preview")
-
-            # ── Right: detail + edit panel ──
-            with Vertical(classes="detail-panel", id="editor-right"):
-                yield Static(id="detail-content")
-                yield Label("", id="detail-spacer")
-                yield Input(
-                    placeholder="New value…",
-                    id="edit-input"
-                )
-                yield Label("", id="validation-msg")
-
-                with Horizontal():
-                    yield Button("Apply Edit",    id="btn-apply",  classes="primary")
-                    yield Button("Clear Pending", id="btn-clear",  classes="warning")
-
-                yield Label(
-                    "Pending edits are saved together when you press S",
-                    classes="status-muted"
-                )
-                yield Label("", id="status-msg")
+        with Vertical(classes="main-area"):
+            yield Label(
+                "🔧  Config Keys  (↑↓ navigate · E/Enter edit · S save)",
+                classes="section-title",
+            )
+            yield DataTable(id="settings-table", cursor_type="row")
+            with Horizontal(classes="forge-buttons forge-panel-footer",
+                            id="config-footer"):
+                yield Button("Apply Edit",    id="btn-apply", variant="primary")
+                yield Button("Clear Pending", id="btn-clear")
+                yield Button("Save Changes",  id="btn-save", variant="primary")
+            yield Label("", id="status-msg")
 
     def on_mount(self) -> None:
-        self._load_settings()
-
-    def on_show(self) -> None:
-        # G1 (A1): silent re-read so pending edits aren't clobbered on screen
-        # switch. on_show used to call _load_settings(), which resets _pending
-        # to {} — meaning if you staged an edit, switched to the Dashboard,
-        # and came back, your stage was silently gone.
         self._reload_view()
-
-    def _load_settings(self) -> None:
-        """Full init — clears any pending edits, reloads, announces.
-
-        Used by on_mount and as a hard-reset path. on_show / action_refresh /
-        post-save use _reload_view() instead so staged edits survive.
-        """
-        self._pending = {}
-        self._reload_view()
-        # Passive mount-time hint — status line only (G2: avoid startup spray).
         self._set_status(
-            "Config loaded. Select a key to view details.", "info", popup=False,
+            "Select a key and press E (or Enter) to edit its value.",
+            "info", popup=False,
         )
 
+    def on_show(self) -> None:
+        # Silent re-read (G1) — staged edits survive section switches.
+        self._reload_view()
+
+    # ── table ─────────────────────────────────────────────────────────
+
     def _reload_view(self) -> None:
-        """Silent re-read from disk. Preserves _pending and selection."""
-        data = self._data = load_config()
+        data = load_config()
         self._settings = get_flat_settings(data)
 
         table = self.query_one("#settings-table", DataTable)
+        cursor = table.cursor_row
         table.clear(columns=True)
-        table.add_columns("Key", "Value")
+        table.add_columns("Key", "Value", "Staged")
 
         for s in self._settings:
-            val_str = str(s["value"]) if s["value"] is not None else ""
-            if len(val_str) > 45:
-                val_str = val_str[:42] + "…"
-            table.add_row(s["key"], val_str)
+            val = str(s["value"]) if s["value"] is not None else ""
+            if len(val) > 40:
+                val = val[:37] + "…"
+            if s["key"] in self._pending:
+                pend = str(self._pending[s["key"]])
+                if _HEX_RE.match(pend):
+                    staged = Text("⏳ ")
+                    staged.append("■ ", style=pend)
+                    staged.append(pend)
+                else:
+                    staged = f"⏳ {pend}"
+            else:
+                staged = ""
+            table.add_row(s["key"], _render_value(val), staged)
 
-        self.query_one("#raw-preview", Static).update(get_raw_text())
+        if cursor is not None and 0 <= cursor < len(self._settings):
+            try:
+                table.move_cursor(row=cursor)
+            except Exception:
+                pass
 
-        # Re-render the detail panel for the selected key so any pending
-        # edit (and the Pending: badge) stays visible after the reload.
-        if self._selected_key:
-            setting = next(
-                (s for s in self._settings if s["key"] == self._selected_key),
-                None,
-            )
-            if setting:
-                self._update_detail(setting)
+    def _selected_setting(self) -> dict | None:
+        table = self.query_one("#settings-table", DataTable)
+        idx = table.cursor_row
+        if idx is None or idx >= len(self._settings):
+            return None
+        return self._settings[idx]
 
-    def on_data_table_row_highlighted(
-        self, event: DataTable.RowHighlighted
-    ) -> None:
-        if event.cursor_row is None:
-            return
-        idx = event.cursor_row
-        if idx >= len(self._settings):
-            return
-        setting = self._settings[idx]
-        self._selected_key = setting["key"]
-        self._update_detail(setting)
+    def on_data_table_row_selected(self, e: DataTable.RowSelected) -> None:
+        # Enter or click on a row = edit its value in place.
+        self.action_edit_selected()
 
-    def _update_detail(self, setting: dict) -> None:
-        key      = setting["key"]
-        value    = setting["value"]
-        desc     = setting["description"] or "No description available."
-        editable = setting["editable"]
-
-        pending_note = ""
-        if key in self._pending:
-            pending_note = f"\n[yellow]⏳ Pending: {self._pending[key]}[/]"
-
-        detail = (
-            f"[bold #cba6f7]{key}[/]\n"
-            f"\n"
-            f"[#89b4fa]Current value:[/]  [#cdd6f4]{value}[/]"
-            f"{pending_note}\n"
-            f"\n"
-            f"[#89b4fa]Description:[/]\n"
-            f"[#a6adc8]{desc}[/]\n"
-        )
-
-        if not editable:
-            detail += (
-                "\n[#6c7086]This value is a list or nested table.\n"
-                "Edit it manually in the raw config.[/]"
-            )
-
-        self.query_one("#detail-content", Static).update(detail)
-
-        if editable:
-            inp = self.query_one("#edit-input", Input)
-            inp.value = str(value) if value is not None else ""
-            self.query_one("#validation-msg", Label).update("")
-
-    def on_input_changed(self, event: Input.Changed) -> None:
-        if not self._selected_key:
-            return
-        raw = event.value
-        if not raw:
-            self.query_one("#validation-msg", Label).update("")
-            return
-        ok, _, error = validate_value(self._selected_key, raw)
-        if ok:
-            self.query_one("#validation-msg", Label).update(
-                "[green]✔  Valid[/]"
-            )
-        else:
-            self.query_one("#validation-msg", Label).update(
-                f"[red]✖  {error}[/]"
-            )
-
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        if event.button.id == "btn-apply":
-            self.action_edit_selected()
-        elif event.button.id == "btn-clear":
-            self._pending = {}
-            self._set_status("Pending edits cleared.", "info")
+    # ── editing ───────────────────────────────────────────────────────
 
     def action_edit_selected(self) -> None:
-        if not self._selected_key:
+        setting = self._selected_setting()
+        if setting is None:
             self._set_status("Select a setting first.", "warn")
             return
-
-        setting = next(
-            (s for s in self._settings if s["key"] == self._selected_key),
-            None
-        )
-        if not setting or not setting["editable"]:
+        if not setting["editable"]:
             self._set_status(
-                "This setting cannot be edited here.", "warn",
+                "This value is a list or nested table — edit it in the raw "
+                "config file.", "warn",
             )
             return
 
-        raw = self.query_one("#edit-input", Input).value
-        ok, coerced, error = validate_value(self._selected_key, raw)
+        key = setting["key"]
+        current = self._pending.get(key, setting["value"])
+        options = get_options(key, current)
+
+        if options and len(options) > 12:
+            self.app.push_screen(
+                FilterPickerModal(f"Select — {key}", options,
+                                  str(current) if current is not None else ""),
+                lambda choice, k=key: self._stage(k, choice),
+            )
+        elif options:
+            self._open_dropdown(key, options)
+        else:
+            self.app.push_screen(
+                FieldEditModal(key, str(current) if current is not None else "",
+                               setting.get("description", "")),
+                lambda raw, k=key: self._stage(k, raw),
+            )
+
+    def _open_dropdown(self, key: str, options: list[str]) -> None:
+        """Anchored dropdown at the table cursor — the no-typos editor."""
+        table = self.query_one("#settings-table", DataTable)
+        r = table.region
+        row = table.cursor_row or 0
+        # header row (1) + row offset − scroll; clamp inside the table.
+        y_off = 1 + row - int(table.scroll_offset.y)
+        y = r.y + max(1, min(y_off, max(1, r.height - 1)))
+        # Anchor at the VALUE column (finding #2), not over the keys.
+        try:
+            key_w = table.ordered_columns[0].get_render_width(table)
+        except Exception:
+            key_w = max((len(s["key"]) for s in self._settings), default=20) + 2
+        x = max(r.x, min(r.x + key_w + 1, r.x + r.width - 24))
+        items = [(opt, str(i + 1) if i < 9 else "", opt)
+                 for i, opt in enumerate(options)]
+        self.app.push_screen(
+            MenuDropdown(items, x, y),
+            lambda choice, k=key: self._stage(k, choice),
+        )
+
+    def _stage(self, key: str, raw) -> None:
+        if raw is None:
+            return
+        ok, coerced, error = validate_value(key, str(raw))
         if not ok:
             self._set_status(error, "error")
             return
-
-        self._pending[self._selected_key] = coerced
+        self._pending[key] = coerced
+        self._reload_view()
         self._set_status(
-            f"Staged: {self._selected_key} = {coerced}  "
-            f"({len(self._pending)} pending)",
+            f"Staged: {key} = {coerced}  ({len(self._pending)} pending)",
             "warn",
         )
-        self._update_detail(setting)
+
+    # ── footer actions ────────────────────────────────────────────────
+
+    def on_button_pressed(self, e: Button.Pressed) -> None:
+        if e.button.id == "btn-apply":
+            self.action_edit_selected()
+        elif e.button.id == "btn-clear":
+            self._pending = {}
+            self._reload_view()
+            self._set_status("Pending edits cleared.", "info")
+        elif e.button.id == "btn-save":
+            self.action_save_changes()
 
     def action_save_changes(self) -> None:
         if not self._pending:
             self._set_status("No pending changes to save.", "warn")
             return
-
         count = len(self._pending)
 
         def on_confirm(confirmed: bool) -> None:
@@ -238,9 +261,6 @@ class ConfigEditorScreen(StatusMixin, Static):
                 set_nested_value(data, key, value)
             if save_config(data):
                 self._pending = {}
-                # _reload_view() (not _load_settings) so the success status
-                # below isn't briefly flashed-over by the "Config loaded…"
-                # mount-time hint that _load_settings would emit.
                 self._reload_view()
                 self._set_status(
                     f"Saved {count} change(s) to alacritty.toml", "ok",
@@ -248,18 +268,19 @@ class ConfigEditorScreen(StatusMixin, Static):
             else:
                 self._set_status("Failed to write config file.", "error")
 
+        summary = "\n".join(
+            f"  {k} = {v}" for k, v in list(self._pending.items())[:8]
+        )
+        if count > 8:
+            summary += f"\n  … and {count - 8} more"
         self.app.push_screen(
             ConfirmDialog(
-                title="Save Changes",
-                message=f"Write {count} pending change(s) to alacritty.toml?"
+                f"Write {count} pending change(s) to alacritty.toml?\n\n{summary}",
+                "Save",
             ),
-            on_confirm
+            on_confirm,
         )
 
     def action_refresh(self) -> None:
-        # _reload_view() so a user-initiated R doesn't drop staged edits.
         self._reload_view()
         self._set_status("Refreshed from disk.", "info")
-
-    # _set_status is provided by StatusMixin (v0.1.1 G2 — unified feedback:
-    # in-screen status line + app-level notify popup).

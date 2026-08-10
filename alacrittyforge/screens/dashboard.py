@@ -121,14 +121,6 @@ class _DashboardContent(Static):
             "[bold #cba6f7]── Backups ────────────────────────────────────────────[/]\n"
             "\n"
             f"  [#89b4fa]Backup count  [/]  {bak_str}\n"
-            "\n"
-            "[bold #cba6f7]── Quick Actions ─────────────────────────────────────[/]\n"
-            "\n"
-            "  Press [bold #b4befe]2[/]  to edit Config settings\n"
-            "  Press [bold #b4befe]3[/]  to browse and apply Themes\n"
-            "  Press [bold #b4befe]4[/]  to manage Fonts\n"
-            "  Press [bold #b4befe]5[/]  to manage Key Bindings\n"
-            "  Press [bold #b4befe]?[/]  for help\n"
         )
 
         self.query_one("#dashboard-body", Static).update(body)

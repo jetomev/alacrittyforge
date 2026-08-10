@@ -225,10 +225,15 @@ def get_raw_text() -> str:
 
 
 def get_active_theme(data: dict) -> str:
-    """Return the currently imported theme filename, if any."""
+    """Return the active theme: an imported theme file's name, or
+    "custom (inline)" when [colors] blocks live directly in the config
+    (Javier's theming model — no themes/ dir needed), else "none"."""
     imports = get_nested_value(data, "general.import")
     if isinstance(imports, list) and imports:
         return Path(imports[0]).stem
+    colors = data.get("colors")
+    if isinstance(colors, dict) and colors:
+        return "custom (inline)"
     return "none"
 
 

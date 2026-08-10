@@ -179,8 +179,10 @@ def list_system_fonts() -> list[str]:
     Uses fc-list if available, otherwise returns empty list.
     """
     try:
+        # v0.2.0 (Javier's ruling): monospace families only — the full
+        # font list is huge and terminals only render mono well anyway.
         result = subprocess.run(
-            ["fc-list", "--format=%{family}\\n"],
+            ["fc-list", ":spacing=mono", "--format=%{family}\\n"],
             capture_output=True, text=True, timeout=5
         )
         fonts = set()

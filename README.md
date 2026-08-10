@@ -6,7 +6,7 @@
 ![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
 ![Python: 3.11+](https://img.shields.io/badge/Python-3.11+-green.svg)
 ![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)
-![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-purple.svg)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-purple.svg)
 [![AUR](https://img.shields.io/aur/version/alacrittyforge)](https://aur.archlinux.org/packages/alacrittyforge)
 
 > 🛡 **Security:** every release is GPG-signed and every commit GitHub-Verified. Read **[Where We Stand](https://github.com/jetomev/KognogOS/blob/main/docs/where-we-stand.md)** — our response to the 2026 AUR supply-chain attacks, what is current during the AUR freeze, and how to verify us instead of trusting us.
@@ -34,13 +34,14 @@ emulators also one of the most unfriendly experiences on Linux? It doesn't have 
 
 ---
 
-## Features
+## Features (v0.2.0 — the forgekit redesign)
 
-- 🏠 **Dashboard** — system overview showing config status, active theme, font, opacity, and backup count
-- 🔧 **Config Editor** — browse and edit all Alacritty settings with descriptions and live validation
-- 🎨 **Theme Browser** — browse locally installed color themes, preview color palettes, apply with one key, and get guided help on installing new themes
-- 🔤 **Font Manager** — view and edit all font settings including family, style, size, spacing, and offsets — with a live list of system fonts
-- ⌨  **Key Bindings** — view all default and user-defined bindings, add custom bindings, delete user bindings
+- 🧭 **forgekit shell** — the shared Forge Suite chrome: menu bar with underlined accelerators, floating Help windows, Catppuccin Mocha, themed scrollbars, compact buttons
+- 🏠 **Dashboard** — config status, active theme (file-based **or** inline colors), font, opacity, backup count
+- 🔧 **Config** — ONE table (`Key | Value | Staged`), values edited **in place**: enumerable keys open a dropdown at the cell (typos impossible — decorations, cursor shape, booleans, shells from `/etc/shells`…), long lists open a **type-to-filter picker**, free values open a floating editor. Color values render with a live **■ swatch**. Fixed footer: Apply Edit · Clear Pending · Save Changes
+- 🎨 **Themes** — the staging flow: active theme first (yellow ✔), **Preview** opens a floating window with the palette; **Activate** stages it (orange 🕓, nothing written) and only **Apply Theme** generates the file (confirm + backup). Understands **both theming models** — theme files via `import`, and colors written inline in `alacritty.toml`, with one-click **"Save colors as theme…"** to promote inline colors into a reusable file
+- 🔤 **Fonts** — same one-table pattern; font families open the filterable **monospace picker** (system fonts via fontconfig)
+- ⌨  **Bindings** — same pattern at **cell level**: navigate `Key | Mods | Action | Chars` cells, edit each with its own dropdown/picker/editor; staged news in orange, staged deletions struck in red; Alacritty defaults shown read-only
 - 🗂 **Backup & Restore** — timestamped backups created automatically before every change, stored in `~/.config/alacritty/backups/`
 
 ---
@@ -57,6 +58,7 @@ emulators also one of the most unfriendly experiences on Linux? It doesn't have 
 - Python 3.11 or newer
 - Alacritty installed and configured
 - `python-textual`, `python-rich`, `python-tomli-w`
+- [`forgekit`](https://github.com/jetomev/forgekit) ≥ 0.3.0 — the shared Forge Suite TUI shell
 
 ---
 
@@ -103,47 +105,41 @@ python main.py
 
 | Key | Action |
 |-----|--------|
-| `1` | Dashboard |
-| `2` | Config Editor |
-| `3` | Theme Browser |
-| `4` | Font Manager |
-| `5` | Key Bindings |
-| `?` | Help |
-| `q` | Quit |
+| `Ctrl+D` or `1` | Dashboard |
+| `Ctrl+C` or `2` | Config |
+| `Ctrl+T` or `3` | Themes |
+| `Ctrl+F` or `4` | Fonts |
+| `Ctrl+B` or `5` | Bindings |
+| `?` or `Ctrl+H` | Toggle the Shortcuts window |
+| `Esc` | Close the open window |
+| `q` / `Ctrl+Q` | Quit |
 
-### Config Editor
+### Config / Fonts
 
 | Key | Action |
 |-----|--------|
-| `E` | Edit selected value |
-| `S` | Save all pending changes |
+| `E` / `Enter` | Edit the selected value in place (dropdown / picker / editor) |
+| `S` | Save all staged changes (confirm + backup) |
 | `R` | Refresh from disk |
 
-### Theme Browser
+### Themes
 
 | Key | Action |
 |-----|--------|
-| `A` | Apply selected theme |
+| `P` / `Enter` | Preview the selected theme (Activate stages it) |
+| `A` | Apply the staged theme — generates the file |
 | `F5` | Refresh theme list |
-| `H` | Toggle installation help guide |
+| `H` | Installation guide window |
 
-### Font Manager
-
-| Key | Action |
-|-----|--------|
-| `E` | Edit selected value |
-| `S` | Save all pending changes |
-| `R` | Refresh from disk |
-
-### Key Bindings
+### Bindings
 
 | Key | Action |
 |-----|--------|
-| `N` | Add new binding |
-| `D` | Delete selected binding |
-| `R` | Refresh |
-
----
+| `←↑↓→` | Move the **cell** cursor |
+| `E` / `Enter` | Edit the cell under the cursor |
+| `N` | Stage a new binding |
+| `D` | Stage/unstage deletion of the selected binding |
+| `S` | Save all staged changes (confirm + backup) |
 
 ## Project Structure
 
@@ -157,16 +153,20 @@ alacrittyforge/
 │   ├── theme_manager.py           # Theme scanner, color extractor, applier
 │   ├── font_manager.py            # Font settings reader and writer
 │   ├── keybind_manager.py         # Keybinding reader, writer, defaults
-│   ├── alacrittyforge.css         # Catppuccin Mocha stylesheet
+│   ├── field_options.py           # Which keys are enumerable + their options
 │   ├── screens/
-│   │   ├── dashboard.py           # System overview screen
-│   │   ├── config_editor.py       # Config editor screen
-│   │   ├── themes.py              # Theme browser screen
-│   │   ├── fonts.py               # Font manager screen
-│   │   └── keybindings.py         # Key bindings screen
+│   │   ├── dashboard.py           # System overview
+│   │   ├── config_editor.py       # One-table in-place editor (+ FieldEditModal)
+│   │   ├── themes.py              # Staging flow (+ preview/save-inline modals)
+│   │   ├── fonts.py               # One-table font editor
+│   │   └── keybindings.py         # Cell-level bindings editor
 │   └── widgets/
-│       └── confirm_dialog.py      # Reusable confirmation dialog
+│       ├── status.py              # StatusMixin (line + toast)
+│       └── picker.py              # FilterPickerModal (type-to-filter long lists)
 ```
+
+The shell chrome (menu bar, sections, dialogs, theme, scrollbars, forms) lives in
+[forgekit](https://github.com/jetomev/forgekit) — shared across the Forge Suite.
 
 
 ---
@@ -191,14 +191,21 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 - [ ] Live preview of font changes
 - [ ] Import/export config profiles
 
-### v0.2.0 — Planned
-- [ ] Dropdown selectors for settings with fixed options (decorations, cursor shape, startup mode, etc.)
-- [ ] Scrollable font picker from system fonts list
-- [ ] Color picker for hex color fields
-- [ ] Screenshots in README
+### v0.3.0 — Planned
+- [ ] Color picker for hex color fields (swatches shipped in v0.2.0)
 - [ ] Backup restore screen
+- [ ] External-edit drift detection (hash of last write → offer bless / restore / save-colors-as-theme)
+- [ ] Screenshots in README
 
-### v0.1.1 — Current (hardening + first AUR release)
+### v0.2.0 — August 10, 2026 (current) — **second Forge app on forgekit + the in-place editing redesign**
+- [x] Shell replaced by [forgekit](https://github.com/jetomev/forgekit) `ForgeApp` (sidebar/Header/Footer/HelpScreen/ConfirmDialog deleted); pushed forms + `CLOSE_KEYS` into the kit (forgekit 0.3.0)
+- [x] Config: one-table in-place editing — anchored dropdowns (from the May roadmap!), filterable pickers for long lists, floating editors, color swatches, fixed footer with Save
+- [x] Themes: preview-and-stage flow + **both theming models** (files via import + inline colors) + save-colors-as-theme; the inline/import "theme shows none" bug fixed
+- [x] Fonts: one-table pattern + monospace-only filterable picker (486 mono families on the reference system — the filter earns its keep)
+- [x] Bindings: cell-level staged editor (new/edit/delete in one Save)
+- [x] Apply-theme correctness: inline `[colors]` stripped on apply (main file overrides imports — the silent-defeat trap)
+
+### v0.1.1 — May 2026 (hardening + first AUR release)
 - [x] Pending edits survive a screen switch (A1)
 - [x] Unified status-line + toast feedback across all screens (A3, A6)
 - [x] Help modal toggles instead of stacking; Esc/q/? dismiss (A2)
@@ -217,6 +224,12 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 ---
 
 ## Changelog
+
+### v0.2.0 — August 10, 2026
+
+**The forgekit redesign** — alacrittyForge becomes the second Forge app on the shared shell, and the release where Javier's in-place editing design language was born: one table per section, values edited where they live (dropdowns for enumerable keys, filterable pickers for long lists, floating editors for free text), staged changes marked ⏳ in the table, and a window-style fixed footer whose Save Changes is the only thing that writes. Three field-review rounds shaped it; the kit grew forms styling and declarative close-keys (forgekit 0.3.0) along the way. Full details in the Roadmap block above and `testing/`.
+
+New dependency: [forgekit ≥ 0.3.0](https://github.com/jetomev/forgekit). AUR update follows when the freeze lifts.
 
 ### v0.1.1 — May 28, 2026
 **Hardening batch + first AUR release**

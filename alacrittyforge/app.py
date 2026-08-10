@@ -1,86 +1,159 @@
 # ═══════════════════════════════════════════════════════════
-#  AlacrittyForge — Main Application Shell
-#  Textual TUI app with sidebar navigation and screen tabs.
+#  AlacrittyForge — Main Application Shell (forgekit era)
+#
+#  v0.2.0: the sidebar / Header / Footer / HelpScreen chrome is replaced
+#  by forgekit.ForgeApp — the shared Forge Suite shell. AlacrittyForge is
+#  the suite's second forgekit adopter (after BitlaForge) and the one
+#  that pushed form styling (Input/Select/DataTable) into the kit.
+#  The five screens and all managers carry over unchanged.
 # ═══════════════════════════════════════════════════════════
 
-from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.widgets import Header, Footer, Label, ContentSwitcher
-from textual.containers import Horizontal, Vertical
 
+from forgekit import ForgeApp, ShortcutsDialog, FORGE_CSS, GPL3_NOTICE
+
+from . import __version__
 from .screens.dashboard import DashboardScreen
 from .screens.config_editor import ConfigEditorScreen
 from .screens.themes import ThemesScreen
 from .screens.fonts import FontsScreen
 from .screens.keybindings import KeyBindingsScreen
-from .widgets.help_screen import HelpScreen
 
 
-class AlacrittyForge(App):
-    """AlacrittyForge — A TUI for managing Alacritty configuration."""
+MENU = [
+    {"id": "dashboard",   "title": "Dashboard", "kind": "section"},
+    {"id": "config",      "title": "Config",    "kind": "section"},
+    {"id": "themes",      "title": "Themes",    "kind": "section"},
+    {"id": "fonts",       "title": "Fonts",     "kind": "section"},
+    {"id": "keybindings", "title": "Bindings",  "kind": "section"},
+    {"id": "help",        "title": "Help",      "kind": "menu", "items": [
+        ("Shortcuts", "s", "shortcuts"),
+        ("License",   "l", "license"),
+        ("About",     "a", "about"),
+    ]},
+    {"id": "quit",        "title": "Quit",      "kind": "action", "action": "quit"},
+]
 
-    CSS_PATH = "alacrittyforge.css"
+SHORTCUTS = [
+    ("Ctrl+D or 1", "Dashboard"),
+    ("Ctrl+C or 2", "Config"),
+    ("Ctrl+T or 3", "Themes"),
+    ("Ctrl+F or 4", "Fonts"),
+    ("Ctrl+B or 5", "Key Bindings"),
+    ("R",           "Refresh the current section"),
+    ("Ctrl+H or ?", "Toggle this shortcuts window"),
+    ("Esc",         "Close the open window"),
+    ("Enter / ↑↓",  "Navigate open menus"),
+    ("Ctrl+Q or Q", "Quit"),
+    ("E / S",       "Config & Fonts: edit selected / save pending"),
+    ("A",           "Themes: apply the selected theme"),
+    ("H",           "Themes: toggle the install guide"),
+    ("N / D",       "Bindings: new binding / delete selected"),
+]
+
+ABOUT = {
+    "name": "AlacrittyForge",
+    "version": __version__,
+    "tagline": "A Forge Suite TUI for managing Alacritty terminal configuration.",
+    "description": (
+        "Browse and edit alacritty.toml, apply color themes, manage fonts "
+        "and keyboard bindings — with validation, staged edits, and automatic "
+        "backups before every write. User-space only; no root required."
+    ),
+    "authors": "Javier (jetomev) + Claude (Anthropic)",
+    "license": "GPL-3.0-or-later",
+    "links": [
+        ("GitHub", "https://github.com/jetomev/alacrittyforge"),
+        ("AUR",    "https://aur.archlinux.org/packages/alacrittyforge"),
+    ],
+}
+
+# App-specific styling on top of the forgekit base (forms/DataTable/buttons
+# now come from the kit — F-9). What remains: the two-panel layout, ListView
+# (promotion candidate when a third app needs lists), and app text classes.
+ALAC_CSS = """
+.main-area { padding: 0 1 0 0; }
+.section-title { color: #cba6f7; text-style: bold; margin-bottom: 1; }
+
+.detail-panel { background: #181825; border: round #313244; padding: 1; margin-left: 1; }
+.detail-title { color: #cba6f7; text-style: bold; margin-bottom: 1; }
+.detail-key   { color: #89b4fa; }
+.detail-value { color: #cdd6f4; }
+.detail-muted { color: #6c7086; }
+.status-ok    { color: #a6e3a1; }
+.status-warn  { color: #f9e2af; }
+.status-err   { color: #f38ba8; }
+.status-info  { color: #89b4fa; }
+.status-muted { color: #6c7086; }
+
+DataTable { background: #1e1e2e; border: solid #313244; }
+DataTable > .datatable--hover { background: #2a2a3d; }
+
+ListView { background: #1e1e2e; border: solid #313244; }
+ListItem { background: #1e1e2e; color: #cdd6f4; padding: 0 1; }
+ListItem:hover { background: #313244; }
+ListView > .listview--highlight { background: #45475a; color: #cdd6f4; }
+
+#raw-preview-container, #theme-preview-container, #system-fonts-container {
+    background: #181825; border: round #313244; padding: 0 1; height: 1fr;
+}
+SelectOverlay { background: #313244; border: solid #89b4fa; }
+"""
+
+
+class AlacShortcuts(ShortcutsDialog):
+    """Shortcuts window that also closes on ? and q (kit CLOSE_KEYS)."""
+    CLOSE_KEYS = ("question_mark", "q")
+
+
+class AlacrittyForge(ForgeApp):
+    """AlacrittyForge — Alacritty configuration TUI, on the forgekit shell."""
+
+    APP_NAME = "⚡ AlacrittyForge"
+    MENU = MENU
+    SHORTCUTS = SHORTCUTS
+    ABOUT = ABOUT
+    LICENSE_NAME = "GPL-3.0-or-later"
+    LICENSE_NOTICE = GPL3_NOTICE
+    CSS = FORGE_CSS + ALAC_CSS
 
     BINDINGS = [
-        Binding("1", "show_screen('dashboard')",   "Dashboard",    show=True),
-        Binding("2", "show_screen('config')",       "Config",       show=True),
-        Binding("3", "show_screen('themes')",       "Themes",       show=True),
-        Binding("4", "show_screen('fonts')",        "Fonts",        show=True),
-        Binding("5", "show_screen('keybindings')", "Key Bindings", show=True),
-        Binding("q", "quit",                        "Quit",         show=True),
-        Binding("question_mark", "show_help",       "Help",         show=True),
+        # AlacrittyForge muscle memory.
+        Binding("1", "activate('dashboard')",   show=False),
+        Binding("2", "activate('config')",      show=False),
+        Binding("3", "activate('themes')",      show=False),
+        Binding("4", "activate('fonts')",       show=False),
+        Binding("5", "activate('keybindings')", show=False),
+        Binding("q", "activate('quit')",        show=False),
+        Binding("question_mark", "toggle_shortcuts", show=False),
+        # forgekit-convention menu accelerators.
+        Binding("ctrl+d", "activate('dashboard')",   show=False, priority=True),
+        Binding("ctrl+c", "activate('config')",      show=False, priority=True),
+        Binding("ctrl+t", "activate('themes')",      show=False, priority=True),
+        Binding("ctrl+f", "activate('fonts')",       show=False, priority=True),
+        Binding("ctrl+b", "activate('keybindings')", show=False, priority=True),
+        # Suite ruling (BitlaForge v0.2.1): Ctrl+H toggles Shortcuts directly.
+        Binding("ctrl+h", "toggle_shortcuts", show=False, priority=True),
     ]
 
-    # Track which nav item is active
-    _current_screen: str = "dashboard"
+    def compose_sections(self):
+        yield DashboardScreen(id="sec-dashboard")
+        yield ConfigEditorScreen(id="sec-config")
+        yield ThemesScreen(id="sec-themes")
+        yield FontsScreen(id="sec-fonts")
+        yield KeyBindingsScreen(id="sec-keybindings")
 
-    def compose(self) -> ComposeResult:
-        yield Header(show_clock=False)
-
-        with Horizontal():
-            # ── Sidebar ──
-            with Vertical(classes="sidebar"):
-                yield Label("⚡ AlacrittyForge", classes="sidebar-title")
-                yield Label("1  🏠  Dashboard",    id="nav-dashboard",   classes="nav-item --active")
-                yield Label("2  🔧  Config",        id="nav-config",      classes="nav-item")
-                yield Label("3  🎨  Themes",        id="nav-themes",      classes="nav-item")
-                yield Label("4  🔤  Fonts",         id="nav-fonts",       classes="nav-item")
-                yield Label("5  ⌨   Key Bindings",  id="nav-keybindings", classes="nav-item")
-
-            # ── Main content area ──
-            with ContentSwitcher(initial="dashboard", id="content"):
-                yield DashboardScreen(id="dashboard")
-                yield ConfigEditorScreen(id="config")
-                yield ThemesScreen(id="themes")
-                yield FontsScreen(id="fonts")
-                yield KeyBindingsScreen(id="keybindings")
-
-        yield Footer()
-
-    def action_show_screen(self, screen_id: str) -> None:
-        """Switch the visible screen and update sidebar highlight."""
-        self._current_screen = screen_id
-        self.query_one("#content", ContentSwitcher).current = screen_id
-        self._update_nav(screen_id)
-
+    def on_section_shown(self, section_id: str) -> None:
+        """Refresh-on-show + focus the section's primary widget (G4)."""
         try:
-            screen = self.query_one(f"#{screen_id}")
+            screen = self.query_one(f"#sec-{section_id}")
         except Exception:
             return
-
-        # Notify the active screen to refresh its data.
         if hasattr(screen, "on_show"):
             try:
                 screen.on_show()
             except Exception:
                 pass
-
-        # G4 (A4): focus the screen's primary widget so its key bindings
-        # (E/S/R on Config Editor, A/F5/H on Themes, E/S/R on Fonts,
-        # N/D/R on Key Bindings) fire immediately on screen entry without
-        # needing a click into the panel first. ContentSwitcher doesn't
-        # move focus on its own; without this, those keys are inert until
-        # the user clicks the table/list.
         focus_id = getattr(screen, "DEFAULT_FOCUS", None)
         if focus_id:
             try:
@@ -88,35 +161,15 @@ class AlacrittyForge(App):
             except Exception:
                 pass
 
-    def _update_nav(self, active_id: str) -> None:
-        """Update sidebar nav item highlight."""
-        nav_ids = [
-            "nav-dashboard",
-            "nav-config",
-            "nav-themes",
-            "nav-fonts",
-            "nav-keybindings",
-        ]
-        for nav_id in nav_ids:
-            try:
-                label = self.query_one(f"#{nav_id}", Label)
-                # Remove --active, re-add only for the active one
-                classes = set(label.classes)
-                classes.discard("--active")
-                if nav_id == f"nav-{active_id}":
-                    classes.add("--active")
-                label.set_classes(" ".join(classes))
-            except Exception:
-                pass
+    def action_act(self, action_id: str) -> None:
+        if action_id == "shortcuts":
+            self.push_screen(AlacShortcuts(self.SHORTCUTS))
+        else:
+            super().action_act(action_id)
 
-    def action_show_help(self) -> None:
-        """Toggle the help overlay.
-
-        A2: previously this always push_screen'd a fresh HelpScreen, so
-        pressing ? twice stacked two modals. Now it toggles — if the top
-        screen is already a HelpScreen, pop it; otherwise push.
-        """
-        if isinstance(self.screen, HelpScreen):
+    def action_toggle_shortcuts(self) -> None:
+        """`?` / Ctrl+H toggles the shortcuts window."""
+        if isinstance(self.screen, ShortcutsDialog):
             self.pop_screen()
         else:
-            self.push_screen(HelpScreen())
+            self.push_screen(AlacShortcuts(self.SHORTCUTS))

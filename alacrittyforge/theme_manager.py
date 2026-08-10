@@ -150,6 +150,11 @@ def apply_theme(theme_path: Path) -> tuple[bool, str]:
     # Set general.import
     data.setdefault("general", {})["import"] = filtered
 
+    # Alacritty: the MAIN file overrides imports — inline [colors] blocks
+    # would silently defeat the imported theme. Strip them on apply (the
+    # backup above preserves them; save_inline_as_theme is the keep-path).
+    data.pop("colors", None)
+
     if save_config(data):
         return True, f"Theme '{theme_path.stem}' applied successfully."
     return False, "Failed to write config file."
@@ -212,3 +217,45 @@ Step 4 — Select it and press A to apply.
   To remove a theme, press A on a different theme, or
   manually remove the import line from your config.
 """
+
+# ── Inline-colors awareness (v0.2.0 — Javier's model) ─────────────────
+
+def get_inline_colors() -> dict:
+    """Return the [colors.*] tables written directly in alacritty.toml
+    (the inline theming model), or {} if none."""
+    from .config_manager import load_config
+    data = load_config()
+    colors = data.get("colors")
+    return colors if isinstance(colors, dict) and colors else {}
+
+
+def has_inline_colors() -> bool:
+    return bool(get_inline_colors())
+
+
+def save_inline_as_theme(name: str) -> tuple[bool, str]:
+    """Write the current inline [colors] to themes/<name>.toml.
+
+    Does NOT touch alacritty.toml — the user previews/activates/applies
+    the new file through the normal staging flow when ready.
+    """
+    import re
+    import tomli_w
+
+    colors = get_inline_colors()
+    if not colors:
+        return False, "No inline [colors] found in alacritty.toml."
+
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", name.strip()).strip("-")
+    if not slug:
+        return False, "Theme name is empty."
+
+    THEMES_DIR.mkdir(parents=True, exist_ok=True)
+    path = THEMES_DIR / f"{slug}.toml"
+    if path.exists():
+        return False, f"themes/{slug}.toml already exists."
+    try:
+        path.write_text(tomli_w.dumps({"colors": colors}))
+    except Exception as e:
+        return False, f"Failed to write theme file: {e}"
+    return True, f"Saved current colors as themes/{slug}.toml"
