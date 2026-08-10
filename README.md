@@ -48,7 +48,28 @@ emulators also one of the most unfriendly experiences on Linux? It doesn't have 
 
 ## Screenshots
 
-*Screenshots coming in v0.2.0*
+*(Generated straight from the running app — `python docs/screenshots/generate.py` re-renders the whole gallery each release, so these never go stale.)*
+
+**Dashboard**
+![Dashboard](docs/screenshots/01-dashboard.svg)
+
+**Config — in-place editing with an anchored dropdown**
+![Config dropdown](docs/screenshots/02-config-dropdown.svg)
+
+**Config — the filterable monospace font picker**
+![Font picker](docs/screenshots/03-config-font-picker.svg)
+
+**Themes — the staging flow**
+![Themes](docs/screenshots/04-themes.svg)
+
+**Theme preview window**
+![Theme preview](docs/screenshots/05-theme-preview.svg)
+
+**Bindings — cell-level editing**
+![Bindings](docs/screenshots/06-bindings.svg)
+
+**Shortcuts window**
+![Shortcuts](docs/screenshots/07-shortcuts.svg)
 
 ---
 
