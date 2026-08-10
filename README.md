@@ -234,15 +234,8 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 - [x] ConfirmDialog: Esc cancels, Enter confirms (A5)
 - [x] Published on the AUR
 
-### v0.1.0 — April 2026 (initial alpha)
-- [x] Dashboard with config overview
-- [x] Config editor with live validation
-- [x] Theme browser with color palette preview
-- [x] Font manager with system font listing
-- [x] Key bindings viewer and editor
-- [x] Automatic timestamped backups
 
----
+*Older roadmap entries live in [docs/ROADMAP.md](docs/ROADMAP.md).*
 
 ## Changelog
 
@@ -266,17 +259,8 @@ Closes 6 findings (A1–A6) from a systematic audit borrowing the grubForge hard
 
 No dependency changes. Same `python`, `python-textual`, `python-rich`, `python-tomli-w`.
 
-### v0.1.0 — April 6, 2026
-**First Alpha Release**
-- 🏠 Dashboard with system overview
-- 🔧 Config Editor with live validation
-- 🎨 Theme Browser with color palette preview and installation guide
-- 🔤 Font Manager with system font listing
-- ⌨  Key Bindings viewer, adder, and deleter
-- 🗂 Automatic timestamped backups before every change
-- 🌙 Catppuccin Mocha theme throughout
 
----
+*The complete history lives in [docs/CHANGELOG.md](docs/CHANGELOG.md).*
 
 ## Authors
 
