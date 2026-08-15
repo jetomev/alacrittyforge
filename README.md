@@ -9,7 +9,7 @@
 ![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-purple.svg)
 [![AUR](https://img.shields.io/aur/version/alacrittyforge)](https://aur.archlinux.org/packages/alacrittyforge)
 
-> 🛡 **Security:** every release is GPG-signed and every commit GitHub-Verified. Read **[Where We Stand](https://github.com/jetomev/KognogOS/blob/main/docs/where-we-stand.md)** — our response to the 2026 AUR supply-chain attacks, what is current during the AUR freeze, and how to verify us instead of trusting us.
+> 🛡 **Security:** every release is GPG-signed and every commit GitHub-Verified. Read **[Where We Stand](https://github.com/jetomev/KognogOS/blob/main/docs/where-we-stand.md)** — our response to the 2026 AUR supply-chain attacks, what is current, and how to verify us instead of trusting us.
 
 ---
 
@@ -243,7 +243,7 @@ Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of
 
 **The forgekit redesign** — alacrittyForge becomes the second Forge app on the shared shell, and the release where Javier's in-place editing design language was born: one table per section, values edited where they live (dropdowns for enumerable keys, filterable pickers for long lists, floating editors for free text), staged changes marked ⏳ in the table, and a window-style fixed footer whose Save Changes is the only thing that writes. Three field-review rounds shaped it; the kit grew forms styling and declarative close-keys (forgekit 0.3.0) along the way. Full details in the Roadmap block above and `testing/`.
 
-New dependency: [forgekit ≥ 0.3.0](https://github.com/jetomev/forgekit). AUR update follows when the freeze lifts.
+New dependency: [forgekit ≥ 0.3.0](https://github.com/jetomev/forgekit), on the AUR as `python-forgekit` — `yay -S alacrittyforge` pulls it in.
 
 ### v0.1.1 — May 28, 2026
 **Hardening batch + first AUR release**
