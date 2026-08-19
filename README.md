@@ -1,6 +1,6 @@
-# ⚡ AlacrittyForge
+# ⚡ alacrittyForge
 
-> A terminal UI application for managing and customizing the Alacritty terminal emulator — safely, intuitively, and beautifully.
+> A terminal application for configuring the Alacritty terminal emulator — safely, clearly, and beautifully.
 
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
@@ -9,89 +9,90 @@
 ![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-purple.svg)
 [![AUR](https://img.shields.io/aur/version/alacrittyforge)](https://aur.archlinux.org/packages/alacrittyforge)
 
-> 🛡 **Security:** every release is GPG-signed and every commit GitHub-Verified. Read **[Where We Stand](https://github.com/jetomev/KognogOS/blob/main/docs/where-we-stand.md)** — our response to the 2026 AUR supply-chain attacks, what is current, and how to verify us instead of trusting us.
+> 🛡 **Security** — every release is GPG-signed and every commit is GitHub-Verified. **[Where We Stand](https://github.com/jetomev/KognogOS/blob/main/docs/where-we-stand.md)** covers our response to the 2026 AUR supply-chain attacks and how to check us yourself.
 
 ---
 
-## Why AlacrittyForge?
+## Why alacrittyForge?
 
-Alacritty is one of the fastest and most elegant terminal emulators available on Linux. But
-configuring it means opening a TOML file in a text editor, knowing exactly what keys and values
-are valid, and hoping you don't make a mistake that breaks your terminal.
+Alacritty is one of the fastest and most elegant terminals on Linux. But configuring it means opening a TOML file in a text editor, knowing exactly which settings and values are valid, and hoping you don't make a mistake that breaks your terminal.
 
-There is no GUI. There is no safety net.
+There's no graphical settings window. There's no safety net.
 
-**AlacrittyForge exists to change that.**
+**alacrittyForge exists to change that.** Configuring your terminal should be:
 
-We believe managing your terminal configuration should be:
-- **Safe** — automatic backups before every change, confirmation dialogs before every write
-- **Clear** — every setting explained in plain language, live validation before anything is saved
-- **Beautiful** — a Catppuccin Mocha themed TUI that feels like a proper application
-- **Accessible** — keyboard-driven, fast, and usable by people who just want their terminal to look right
-
-AlacrittyForge was born from a simple frustration: why is configuring one of the best terminal
-emulators also one of the most unfriendly experiences on Linux? It doesn't have to be.
+- **Safe** — a backup before every change, and a confirmation before every write
+- **Clear** — settings explained in plain language and checked before they're saved
+- **Good-looking** — a proper application, in the terminal it configures
+- **Approachable** — keyboard-driven, fast, and usable if you just want your terminal to look right
 
 ---
 
-## Features (v0.2.0 — the forgekit redesign)
+## Features
 
-- 🧭 **forgekit shell** — the shared Forge Suite chrome: menu bar with underlined accelerators, floating Help windows, Catppuccin Mocha, themed scrollbars, compact buttons
-- 🏠 **Dashboard** — config status, active theme (file-based **or** inline colors), font, opacity, backup count
-- 🔧 **Config** — ONE table (`Key | Value | Staged`), values edited **in place**: enumerable keys open a dropdown at the cell (typos impossible — decorations, cursor shape, booleans, shells from `/etc/shells`…), long lists open a **type-to-filter picker**, free values open a floating editor. Color values render with a live **■ swatch**. Fixed footer: Apply Edit · Clear Pending · Save Changes
-- 🎨 **Themes** — the staging flow: active theme first (yellow ✔), **Preview** opens a floating window with the palette; **Activate** stages it (orange 🕓, nothing written) and only **Apply Theme** generates the file (confirm + backup). Understands **both theming models** — theme files via `import`, and colors written inline in `alacritty.toml`, with one-click **"Save colors as theme…"** to promote inline colors into a reusable file
-- 🔤 **Fonts** — same one-table pattern; font families open the filterable **monospace picker** (system fonts via fontconfig)
-- ⌨  **Bindings** — same pattern at **cell level**: navigate `Key | Mods | Action | Chars` cells, edit each with its own dropdown/picker/editor; staged news in orange, staged deletions struck in red; Alacritty defaults shown read-only
-- 🗂 **Backup & Restore** — timestamped backups created automatically before every change, stored in `~/.config/alacritty/backups/`
+Values are edited **where they live**. There's no separate form to fill in — you move to a setting in the table and change it in place.
+
+- 🏠 **Dashboard** — your current setup at a glance: active theme, font, opacity, and how many backups you have
+- 🔧 **Config** — one table of `Key | Value | Staged`. Settings with a fixed set of valid options open a **dropdown right at the cell**, so typos are impossible. Long lists open a **type-to-filter picker**. Anything free-form opens a small editor. Colour values show a live **■ swatch**.
+- 🎨 **Themes** — preview before you commit. **Preview** opens a window showing the palette, **Activate** stages your choice without writing anything, and only **Apply** writes the file — after a confirmation and a backup.
+
+  It understands **both ways Alacritty does themes**: separate theme files, and colours written directly into your config. If yours are inline, one click promotes them into a reusable theme file.
+- 🔤 **Fonts** — the same table pattern, with a filterable picker listing the monospace fonts actually installed on your system
+- ⌨ **Bindings** — edited cell by cell. Move across `Key | Mods | Action | Chars` and change each part with the right kind of editor. New bindings show in orange, deletions in struck-through red, and Alacritty's own defaults are shown read-only so you can see what you're overriding.
+- 🗂 **Backup & Restore** — a timestamped backup before every change, kept in `~/.config/alacritty/backups/`
+
+Nothing is written until you press **Save**. Staged changes are marked ⏳ so you always know what's pending.
 
 ---
 
 ## Screenshots
 
-*(Generated straight from the running app — `python docs/screenshots/generate.py` re-renders the whole gallery each release, so these never go stale.)*
+*Generated from the running app — `python docs/screenshots/generate.py` re-renders the gallery each release, so they never go stale.*
 
 **Dashboard**
 ![Dashboard](docs/screenshots/01-dashboard.svg)
 
-**Config — in-place editing with an anchored dropdown**
+**Config — editing in place, with a dropdown at the cell**
 ![Config dropdown](docs/screenshots/02-config-dropdown.svg)
 
-**Config — the filterable monospace font picker**
+**Config — the filterable font picker**
 ![Font picker](docs/screenshots/03-config-font-picker.svg)
 
-**Themes — the staging flow**
+**Themes — preview and stage**
 ![Themes](docs/screenshots/04-themes.svg)
 
-**Theme preview window**
+**Theme preview**
 ![Theme preview](docs/screenshots/05-theme-preview.svg)
 
 **Bindings — cell-level editing**
 ![Bindings](docs/screenshots/06-bindings.svg)
 
-**Shortcuts window**
+**Shortcuts**
 ![Shortcuts](docs/screenshots/07-shortcuts.svg)
 
 ---
 
 ## Requirements
 
-- Linux
+- Linux, with Alacritty installed
 - Python 3.11 or newer
-- Alacritty installed and configured
 - `python-textual`, `python-rich`, `python-tomli-w`
-- [`forgekit`](https://github.com/jetomev/forgekit) ≥ 0.3.0 — the shared Forge Suite TUI shell
+- [`forgekit`](https://github.com/jetomev/forgekit) 0.3.0 or newer — the shared foundation for Forge apps
 
 ---
 
 ## Installation
 
-### Arch Linux — AUR (recommended)
+### Arch Linux, from the AUR (recommended)
+
 ```bash
 yay -S alacrittyforge
 ```
-Then just run `alacrittyforge`.
 
-### Arch Linux — from source
+Then run `alacrittyforge`.
+
+### Arch Linux, from source
+
 ```bash
 sudo pacman -S python-textual python-rich python-tomli-w
 git clone https://github.com/jetomev/alacrittyforge.git
@@ -100,6 +101,7 @@ python main.py
 ```
 
 ### Other distributions
+
 ```bash
 pip install textual rich tomli-w
 git clone https://github.com/jetomev/alacrittyforge.git
@@ -110,19 +112,18 @@ python main.py
 ---
 
 ## Usage
+
 ```bash
-cd alacrittyforge
-python main.py
+alacrittyforge
 ```
 
-> No `sudo` required — AlacrittyForge writes only to your user config at
-> `~/.config/alacritty/alacritty.toml` and backups at `~/.config/alacritty/backups/`.
+> **No `sudo` needed.** alacrittyForge only ever writes to your own configuration at `~/.config/alacritty/alacritty.toml`, and its backups next to it.
 
 ---
 
 ## Keybindings
 
-### Global
+### Anywhere
 
 | Key | Action |
 |-----|--------|
@@ -131,36 +132,38 @@ python main.py
 | `Ctrl+T` or `3` | Themes |
 | `Ctrl+F` or `4` | Fonts |
 | `Ctrl+B` or `5` | Bindings |
-| `?` or `Ctrl+H` | Toggle the Shortcuts window |
+| `?` or `Ctrl+H` | Shortcuts window |
 | `Esc` | Close the open window |
 | `q` / `Ctrl+Q` | Quit |
 
-### Config / Fonts
+### Config and Fonts
 
 | Key | Action |
 |-----|--------|
-| `E` / `Enter` | Edit the selected value in place (dropdown / picker / editor) |
-| `S` | Save all staged changes (confirm + backup) |
-| `R` | Refresh from disk |
+| `E` / `Enter` | Edit the selected value in place |
+| `S` | Save everything staged (confirms, then backs up) |
+| `R` | Reload from disk |
 
 ### Themes
 
 | Key | Action |
 |-----|--------|
-| `P` / `Enter` | Preview the selected theme (Activate stages it) |
-| `A` | Apply the staged theme — generates the file |
-| `F5` | Refresh theme list |
-| `H` | Installation guide window |
+| `P` / `Enter` | Preview the selected theme |
+| `A` | Apply the staged theme |
+| `H` | Installation guide |
+| `F5` | Refresh the theme list |
 
 ### Bindings
 
 | Key | Action |
 |-----|--------|
-| `←↑↓→` | Move the **cell** cursor |
+| `←↑↓→` | Move between cells |
 | `E` / `Enter` | Edit the cell under the cursor |
 | `N` | Stage a new binding |
-| `D` | Stage/unstage deletion of the selected binding |
-| `S` | Save all staged changes (confirm + backup) |
+| `D` | Stage or unstage a deletion |
+| `S` | Save everything staged |
+
+---
 
 ## Project Structure
 
@@ -168,99 +171,112 @@ python main.py
 alacrittyforge/
 ├── main.py                        # Entry point
 ├── alacrittyforge/
-│   ├── app.py                     # Main Textual application shell
-│   ├── config_manager.py          # TOML config parser, writer, validator
-│   ├── backup_manager.py          # Backup create, list, restore, delete
-│   ├── theme_manager.py           # Theme scanner, color extractor, applier
-│   ├── font_manager.py            # Font settings reader and writer
-│   ├── keybind_manager.py         # Keybinding reader, writer, defaults
-│   ├── field_options.py           # Which keys are enumerable + their options
-│   ├── screens/
-│   │   ├── dashboard.py           # System overview
-│   │   ├── config_editor.py       # One-table in-place editor (+ FieldEditModal)
-│   │   ├── themes.py              # Staging flow (+ preview/save-inline modals)
-│   │   ├── fonts.py               # One-table font editor
-│   │   └── keybindings.py         # Cell-level bindings editor
-│   └── widgets/
-│       ├── status.py              # StatusMixin (line + toast)
-│       └── picker.py              # FilterPickerModal (type-to-filter long lists)
+│   ├── app.py                     # The application shell
+│   ├── config_manager.py          # Reads, validates and writes the TOML config
+│   ├── backup_manager.py          # Create, list, restore and delete backups
+│   ├── theme_manager.py           # Finds themes, reads their colours, applies them
+│   ├── font_manager.py            # Font settings
+│   ├── keybind_manager.py         # Keybindings, including Alacritty's defaults
+│   ├── field_options.py           # Which settings have fixed options, and what they are
+│   ├── screens/                   # One file per section
+│   └── widgets/                   # Status line and the filterable picker
+├── docs/                          # Changelog, roadmap, screenshots
+├── testing/                       # Test matrix and results per version
+└── LICENSE
 ```
 
-The shell chrome (menu bar, sections, dialogs, theme, scrollbars, forms) lives in
-[forgekit](https://github.com/jetomev/forgekit) — shared across the Forge Suite.
-
+The menu bar, dialogs, theme and scrollbars come from [forgekit](https://github.com/jetomev/forgekit), shared across the Forge apps.
 
 ---
 
 ## Safety Philosophy
 
-AlacrittyForge is built around one principle: **never silently modify your config**.
+alacrittyForge is built around one rule: **never change your config without telling you.**
 
-Every change goes through three layers of protection:
+Every change passes three checks:
 
-1. **Validation** — input is checked before it is staged
-2. **Confirmation** — a dialog asks you to confirm before anything is written
-3. **Backup** — a timestamped backup of your current config is created automatically before every write
+1. **Validation** — input is checked before it's staged
+2. **Confirmation** — a dialog asks before anything is written
+3. **Backup** — your current config is saved automatically first
 
-Backups are stored in `~/.config/alacritty/backups/` and kept up to a maximum of 20.
+Backups live in `~/.config/alacritty/backups/`, keeping the 20 most recent.
 
 ---
 
 ## Roadmap
 
-### Future
+### Next — v0.3.0
+
+- [ ] **A colour picker** for hex colour fields (swatches shipped in v0.2.0)
+- [ ] **A backup restore screen** — backups are created automatically, but restoring one still means doing it by hand
+- [ ] **Notice when your config changed outside the app** — remember what we last wrote, and if the file no longer matches, offer to accept it, restore ours, or save its colours as a theme
+
+### Later
+
 - [ ] Live preview of font changes
-- [ ] Import/export config profiles
+- [ ] Import and export configuration profiles
 
-### v0.3.0 — Planned
-- [ ] Color picker for hex color fields (swatches shipped in v0.2.0)
-- [ ] Backup restore screen
-- [ ] External-edit drift detection (hash of last write → offer bless / restore / save-colors-as-theme)
-- [ ] Screenshots in README
+### v0.2.0 — August 10, 2026 (current)
 
-### v0.2.0 — August 10, 2026 (current) — **second Forge app on forgekit + the in-place editing redesign**
-- [x] Shell replaced by [forgekit](https://github.com/jetomev/forgekit) `ForgeApp` (sidebar/Header/Footer/HelpScreen/ConfirmDialog deleted); pushed forms + `CLOSE_KEYS` into the kit (forgekit 0.3.0)
-- [x] Config: one-table in-place editing — anchored dropdowns (from the May roadmap!), filterable pickers for long lists, floating editors, color swatches, fixed footer with Save
-- [x] Themes: preview-and-stage flow + **both theming models** (files via import + inline colors) + save-colors-as-theme; the inline/import "theme shows none" bug fixed
-- [x] Fonts: one-table pattern + monospace-only filterable picker (486 mono families on the reference system — the filter earns its keep)
-- [x] Bindings: cell-level staged editor (new/edit/delete in one Save)
-- [x] Apply-theme correctness: inline `[colors]` stripped on apply (main file overrides imports — the silent-defeat trap)
+- [x] Rebuilt on [forgekit](https://github.com/jetomev/forgekit), the shared Forge foundation
+- [x] Config: one-table in-place editing — dropdowns at the cell, filterable pickers, colour swatches, and a fixed footer where Save is the only thing that writes
+- [x] Themes: preview-and-stage flow, support for **both** theming models, and one-click promotion of inline colours into a theme file
+- [x] Fonts: the same table pattern, with a monospace-only picker (486 families on the test machine — the filter earns its keep)
+- [x] Bindings: cell-level editing, with new, changed and deleted entries all saved together
+- [x] Fixed a silent trap: colours written directly in your config quietly override an imported theme, so applying a theme now clears them
 
-### v0.1.1 — May 2026 (hardening + first AUR release)
-- [x] Pending edits survive a screen switch (A1)
-- [x] Unified status-line + toast feedback across all screens (A3, A6)
-- [x] Help modal toggles instead of stacking; Esc/q/? dismiss (A2)
-- [x] Screen bindings fire on entry without a panel click (A4)
-- [x] ConfirmDialog: Esc cancels, Enter confirms (A5)
+### v0.1.1 — May 2026
+
+- [x] Staged edits survive switching screens
+- [x] One consistent way of reporting what happened, across every screen
+- [x] Help window toggles instead of stacking
+- [x] Screen keys work as soon as you arrive, without clicking first
+- [x] Confirmation dialogs: `Esc` cancels, `Enter` confirms
 - [x] Published on the AUR
 
+*Older entries live in [docs/ROADMAP.md](docs/ROADMAP.md).*
 
-*Older roadmap entries live in [docs/ROADMAP.md](docs/ROADMAP.md).*
+---
 
 ## Changelog
 
 ### v0.2.0 — August 10, 2026
 
-**The forgekit redesign** — alacrittyForge becomes the second Forge app on the shared shell, and the release where Javier's in-place editing design language was born: one table per section, values edited where they live (dropdowns for enumerable keys, filterable pickers for long lists, floating editors for free text), staged changes marked ⏳ in the table, and a window-style fixed footer whose Save Changes is the only thing that writes. Three field-review rounds shaped it; the kit grew forms styling and declarative close-keys (forgekit 0.3.0) along the way. Full details in the Roadmap block above and `testing/`.
+**The forgekit redesign.** alacrittyForge became the second Forge app built on the shared foundation — and the release where the in-place editing style was invented.
 
-New dependency: [forgekit ≥ 0.3.0](https://github.com/jetomev/forgekit), on the AUR as `python-forgekit` — `yay -S alacrittyforge` pulls it in.
+The idea: one table per section, with values edited where they live. Settings with fixed options open a dropdown right at the cell, long lists open a filterable picker, free text opens a small editor. Staged changes are marked ⏳ in the table, and a fixed footer at the bottom holds the only button that writes anything.
+
+Three rounds of hands-on review shaped it, and the shared foundation grew form styling and simpler window-closing along the way — improvements every other Forge app inherited.
+
+One bug fixed here is worth calling out, because it's invisible until it bites you: colours written directly in `alacritty.toml` silently override any theme you import. You apply a theme, nothing appears to happen, and there's no error. Applying a theme now clears those inline colours first.
+
+New dependency: [forgekit 0.3.0](https://github.com/jetomev/forgekit) or newer, packaged on the AUR as `python-forgekit`. `yay -S alacrittyforge` pulls it in for you.
 
 ### v0.1.1 — May 28, 2026
-**Hardening batch + first AUR release**
 
-Closes 6 findings (A1–A6) from a systematic audit borrowing the grubForge hardening playbook (grubForge is the Forge-suite sibling for the GRUB bootloader). Shipped in four thematic groups:
+**A hardening batch**, closing six findings from an audit that borrowed grubForge's playbook.
 
-- 🔒 **G1 — Pending safety + refresh-on-show split** *(A1)*. `on_show()` on Config Editor and Fonts used to call `_load_settings()`, which begins with `self._pending = {}` — so staging an edit, switching screens, and coming back silently wiped the stage. Split into `_reload_view()` (silent re-read; preserves `_pending` and selection) and `_load_settings()` (full reset; used by `on_mount` and as a hard-reset). `on_show` / `action_refresh` / post-save now route through the silent path.
-- 💬 **G2 — Unified feedback surface** *(A3, A6)*. New `widgets/status.py::StatusMixin` provides one `_set_status(msg, level, popup=True)` that writes a colored icon + message to a per-screen status line **and** fires an app-level toast. `popup=False` for passive mount-time hints so the five screens don't spray notifications at app launch. The Dashboard gains an `R` action with toast; redundant duplicate status labels in Fonts (`#font-save-status`) and Key Bindings (`#keys-add-status`) are gone. Icons consolidated to the unicode set used in grubForge: `✓ ● ⚠ ✗`.
-- ❓ **G3 — Help modal hardening** *(A2)*. The help overlay used to be an inline-nested `ModalScreen` class defined inside `action_show_help`, which `push_screen`'d on every keypress — pressing `?` twice stacked two help modals. Extracted to `widgets/help_screen.py`; the app now toggles (pop if already on top, else push). The modal binds `?` itself so a second `?` while open closes it directly; `q` stays bound on the modal so it shadows the app-level quit.
-- 🎯 **G4 — Focus-on-show + ConfirmDialog keys** *(A4, A5)*. Screen bindings used to be inert until the user clicked into a panel — `ContentSwitcher` doesn't move focus on its own. Each action screen now declares `DEFAULT_FOCUS` (`#settings-table`, `#themes-list`, `#fonts-table`, `#keys-table`) and `App.action_show_screen` focuses it after `on_show`. `ConfirmDialog` gains `escape` → cancel, `enter` → confirm so keyboard users don't have to Tab+Space onto a button.
+- 🔒 **Staged edits stopped disappearing.** Switching away from a screen and back silently discarded everything you'd staged — the code that re-read from disk also reset the staging area. Reading and resetting are now separate things.
+- 💬 **One feedback channel.** Every screen now reports through the same status line and toast, instead of five near-identical versions with their own inconsistent icons.
+- ❓ **The help window stopped stacking.** Pressing `?` twice used to open two of them. It now toggles, and `Esc`, `q` or `?` all close it.
+- 🎯 **Keys work on arrival.** Screen shortcuts used to be dead until you clicked into a panel first. Each screen now takes focus when you open it.
+- ⌨ **Confirmation dialogs got keyboard-friendly** — `Esc` cancels, `Enter` confirms, no tabbing onto a button.
 
-**Packaging:** Published on the AUR (`alacrittyforge`). The PKGBUILD's `check()` step runs a **headless mount** smoke under Textual's `run_test` harness — catches CSS-parse and `on_mount` failures at build time, not just import breaks.
-
-No dependency changes. Same `python`, `python-textual`, `python-rich`, `python-tomli-w`.
-
+**Packaging:** published on the AUR. The build now launches the app headlessly as a check, so a styling or startup error is caught while building rather than when you first run it.
 
 *The complete history lives in [docs/CHANGELOG.md](docs/CHANGELOG.md).*
+
+---
+
+## Related Projects
+
+- **[KognogOS](https://github.com/jetomev/KognogOS)** — the distribution alacrittyForge ships with
+- **[forgekit](https://github.com/jetomev/forgekit)** — the shared foundation for the Forge apps
+- **[nog](https://github.com/jetomev/nog)** — tier-aware package manager
+- **[grubForge](https://github.com/jetomev/grubforge)** — bootloader manager
+- **[bitlaForge](https://github.com/jetomev/bitlaforge)** — solo Bitcoin mining, honestly framed
+
+---
 
 ## Authors
 
@@ -268,22 +284,18 @@ No dependency changes. Same `python`, `python-textual`, `python-rich`, `python-t
 
 **Claude (Anthropic)** — co-developer, architecture, implementation
 
-This project was built as a collaboration between a human with a great idea and an AI that
-helped bring it to life — one command at a time.
+Built as a collaboration between a human with a good idea and an AI that helped bring it to life — one command at a time.
 
 ---
 
 ## License
 
-AlacrittyForge is free software: you can redistribute it and/or modify it under the terms
-of the **GNU General Public License v3.0** as published by the Free Software Foundation.
-
-See [LICENSE](LICENSE) for the full license text.
+alacrittyForge is free software, released under the **GNU General Public License v3.0**. See [LICENSE](LICENSE) for the full text.
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or pull request on GitHub.
+Contributions are welcome — open an issue or a pull request.
 
-If you find AlacrittyForge useful, consider starring the repository — it helps others find it.
+If you find alacrittyForge useful, a star helps others find it.
