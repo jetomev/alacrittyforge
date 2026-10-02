@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from . import backups
+from .alacritty import Names, installed_version
 from .settings_file import (CONFIG_PATH, MISSING, REMOVE, RENAMED, SaveResult, SettingsFile, old_names,
                             rename_changes, save)
 from .settings_spec import BY_KEY, Setting, default_words, problem, shell_program, shown
@@ -55,15 +56,18 @@ class Session:
     file: SettingsFile = field(default=None)
     pending: dict[str, Any] = field(default_factory=dict)
     new_files: dict[Path, str] = field(default_factory=dict)  # theme files a save will write
+    raw: dict[str, Any] = field(default_factory=dict)        # file-level changes (renames)
+    names: Names = field(default=None)       # the names the installed Alacritty reads
     saved_at: dt.datetime | None = None
     saves: list[str] = field(default_factory=list)      # for the closing note
     last_backup: Path | None = None
 
     @classmethod
     def load(cls, path: Path = CONFIG_PATH, backup_dir: Path | None = None,
-             themes_dir: Path | None = None) -> "Session":
+             themes_dir: Path | None = None, version: tuple | None | str = "installed") -> "Session":
         from .themes import THEMES_DIR
-        s = cls(path=Path(path), backup_dir=backup_dir, themes_dir=themes_dir or THEMES_DIR)
+        s = cls(path=Path(path), backup_dir=backup_dir, themes_dir=themes_dir or THEMES_DIR,
+                names=Names(installed_version() if version == "installed" else version))
         s.file = SettingsFile.load(s.path)
         return s
 
@@ -81,7 +85,7 @@ class Session:
         return self.file.readable
 
     def original(self, key: str) -> Any:
-        v = self.file.get(key)
+        v = self.file.get(self.names.file_key(key))
         return None if v is MISSING else v
 
     def value(self, key: str) -> Any:
@@ -113,6 +117,7 @@ class Session:
     def discard(self) -> None:
         self.pending.clear()
         self.new_files.clear()
+        self.raw.clear()
 
     def add_file(self, path: Path, text: str) -> None:
         """Stage a new file (a theme); the save writes it, never over another."""
@@ -120,7 +125,7 @@ class Session:
 
     @property
     def change_count(self) -> int:
-        return len(self.pending) + len(self.new_files)
+        return len(self.pending) + len(self.new_files) + (1 if self.raw else 0)
 
     def problems(self) -> list[str]:
         out = []
@@ -134,6 +139,10 @@ class Session:
         """(label, old, new) for the review, in the order settings are shown."""
         order = list(BY_KEY)
         out = [("New theme", "", p.stem) for p in self.new_files]
+        moved = [(k, v) for k, v in self.raw.items() if v is not REMOVE]
+        for k, _v in moved:
+            gone = next((w for w, r in self.misnamed().items() if r == k), "")
+            out.append(("Setting name", gone, k))
         for k in sorted(self.pending, key=lambda k: order.index(k) if k in order else len(order)):
             if k == "general.import":
                 out.append(("Theme", _theme_names(self.original(k)), _theme_names(self.pending[k])))
@@ -148,7 +157,7 @@ class Session:
         return out
 
     def file_changes(self) -> dict[str, Any]:
-        """``pending`` as the file needs it."""
+        """``pending`` as the file needs it, in the names the installed Alacritty reads."""
         out = dict(self.pending)
         if "terminal.shell" in out:
             prog = out.pop("terminal.shell")
@@ -157,7 +166,9 @@ class Session:
                 out["terminal.shell.program"] = prog    # keep its args
             else:
                 out["terminal.shell"] = prog
-        return out
+        named = {self.names.file_key(k): v for k, v in out.items()}
+        named.update(self.raw)
+        return named
 
     # ── saving ───────────────────────────────────────────────────────────
     def save(self, note: str = "Before a save") -> SaveResult | None:
@@ -170,22 +181,40 @@ class Session:
             write_atomic(path, text)
         self.new_files.clear()
         r = None
-        if self.pending:
+        if self.pending or self.raw:
             r = save(self.file_changes(), path=self.path, note=note, backup_dir=self.backup_dir)
             self.last_backup = r.backup
         self.pending.clear()
+        self.raw.clear()
         self.saved_at = dt.datetime.now()
         self.saves.append(f"Saved {n} change{'s' if n != 1 else ''} at {self.saved_at:%I:%M %p}.")
         self.reload()
         return r
 
     # ── what needs attention ─────────────────────────────────────────────
+    def misnamed(self) -> dict[str, str]:
+        """Names the installed Alacritty doesn't read → the names it does. The
+        0.14 moves go whichever way this version needs; older renames
+        (key_bindings → keyboard.bindings…) only forwards."""
+        from .alacritty import MOVED_IN_0_14
+        moved = set(MOVED_IN_0_14) | set(MOVED_IN_0_14.values())
+        # the 0.14 moves go whichever way this version needs; the rest only forwards
+        out = {o: n for o, n in RENAMED.items() if o not in moved and n not in moved}
+        out.update(self.names.misnamed())
+        return out
+
     def old_names(self) -> list[tuple[str, str]]:
-        return old_names(self.file) if self.readable else []
+        if not self.readable:
+            return []
+        return [(w, r) for w, r in self.misnamed().items() if self.file.get(w) is not MISSING]
 
     def stage_renames(self) -> None:
-        for k, v in rename_changes(self.file).items():
-            self.pending[k] = v
+        """Move each misnamed setting to the name this Alacritty reads; where
+        both are set, the one it reads wins."""
+        for wrong, right in self.old_names():
+            if self.file.get(right) is MISSING:
+                self.raw[right] = self.file.get(wrong)
+            self.raw[wrong] = REMOVE
 
     def unknown_keys(self) -> list[str]:
         """Settings in the file that Alacritty 0.17 doesn't use (it warns, then ignores them)."""
@@ -193,7 +222,7 @@ class Session:
             return []
         out = []
         for key in _leaves(self.file.values()):
-            if key in BY_KEY or key.split(".")[0] in RENAMED:
+            if key in BY_KEY or key.split(".")[0] in RENAMED or key in self.misnamed():
                 continue
             if key.startswith(KNOWN_PREFIXES) or key in ("env", "terminal.shell"):
                 continue

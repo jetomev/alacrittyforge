@@ -47,7 +47,7 @@ class F1(unittest.IsolatedAsyncioTestCase):
         with tempfile.TemporaryDirectory() as t:
             cfg = Path(t) / "alacritty.toml"
             cfg.write_text("[font]\nsize = 12.0\n")
-            app = AlacrittyForgeApp(session=Session.load(cfg, backup_dir=Path(t) / "bk"))
+            app = AlacrittyForgeApp(session=Session.load(cfg, backup_dir=Path(t) / "bk", version=(0, 17, 0)))
             async with app.run_test(size=(120, 40)) as pilot:
                 await pilot.press("2")
                 await pilot.pause(0.4)

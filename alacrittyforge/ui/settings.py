@@ -86,7 +86,8 @@ class SettingsScreen(Horizontal):
                         yield Static(f"[b $forge-title-accent]{label}[/]   [$forge-muted]{escape(desc)}[/]",
                                      classes="af-group-title")
                         for s in SETTINGS:
-                            if s.group == gid:
+                            # left out when the installed Alacritty doesn't have it
+                            if s.group == gid and self.session.names.has(s.key):
                                 row = self._row(s)
                                 self.rows[s.key] = row
                                 yield row

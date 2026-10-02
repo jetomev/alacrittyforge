@@ -64,7 +64,7 @@ class TheSession(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.cfg = Path(self._tmp.name) / "alacritty.toml"
         self.cfg.write_text(SAMPLE)
-        self.s = Session.load(self.cfg, backup_dir=Path(self._tmp.name) / "bk")
+        self.s = Session.load(self.cfg, backup_dir=Path(self._tmp.name) / "bk", version=(0, 17, 0))
 
     def tearDown(self):
         self._tmp.cleanup()

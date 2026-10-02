@@ -17,6 +17,7 @@ from textual.widgets import Button, Static
 from forgekit import glyph
 
 from .. import backups
+from ..alacritty import shown_version
 
 
 def when(t: dt.datetime | None) -> str:
@@ -87,7 +88,7 @@ class OverviewScreen(VerticalScroll, can_focus=False):
                 win.append(f"{cols}×{lines}")
             shell = s.shown("terminal.shell").replace("not set (", "").rstrip(")")
             n_keys = len(s.value("keyboard.bindings") or [])
-            rows = [("Theme", theme_name(s)), ("Font", f"{font} · {size}"), ("Window", " · ".join(win)),
+            rows = [("Alacritty", shown_version(s.names.version)), ("Theme", theme_name(s)), ("Font", f"{font} · {size}"), ("Window", " · ".join(win)),
                     ("Shell", shell), ("Shortcuts", f"{n_keys} of yours")]
         else:
             rows = [("File", "can't be read")]
@@ -104,14 +105,23 @@ class OverviewScreen(VerticalScroll, can_focus=False):
         old = s.old_names()
         if old:
             names = ", ".join(f"{o} → {n}" for o, n in old)
-            items.append((f"{warn} [b]{len(old)} setting{'s use' if len(old) != 1 else ' uses'} an old name.[/]",
-                          f"{escape(names)}. Alacritty still reads them, but warns every time it starts."))
+            if s.names.legacy:
+                items.append((f"{warn} [b]{len(old)} setting{'s use' if len(old) != 1 else ' uses'} a newer name "
+                              "than this Alacritty reads.[/]",
+                              f"{escape(names)}. Alacritty {shown_version(s.names.version)} ignores them until "
+                              "they're moved."))
+            else:
+                items.append((f"{warn} [b]{len(old)} setting{'s use' if len(old) != 1 else ' uses'} an old name.[/]",
+                              f"{escape(names)}. Alacritty still reads them, but warns every time it starts."))
         unknown = s.unknown_keys()
         if unknown:
             items.append((f"[$forge-info]{glyph('info')}[/] {len(unknown)} setting"
                           f"{'s' if len(unknown) != 1 else ''} Alacritty doesn't know",
                           f"{escape(', '.join(unknown[:4]))}{'…' if len(unknown) > 4 else ''}. It ignores "
                           "them; often a misspelling."))
+        if s.names.version is None:
+            items.append((f"[$forge-info]{glyph('info')}[/] Alacritty isn't installed",
+                          "alacrittyForge can still prepare its settings; they'll be used once it is."))
         if s.readable and not s.live_reload():
             items.append((f"[$forge-info]{glyph('info')}[/] Changes wait for a restart",
                           "\"Pick up changes by itself\" is off, so a saved change shows the next time "

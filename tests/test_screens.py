@@ -79,7 +79,7 @@ class Screens(unittest.IsolatedAsyncioTestCase):
         from alacrittyforge.app import AlacrittyForgeApp
         if text is not None:
             self.cfg.write_text(text)
-        return AlacrittyForgeApp(session=Session.load(self.cfg, backup_dir=self.dir / "bk", themes_dir=self.tdir))
+        return AlacrittyForgeApp(session=Session.load(self.cfg, backup_dir=self.dir / "bk", themes_dir=self.tdir, version=(0, 17, 0)))
 
     async def test_nothing_is_changed_at_start_or_after_visiting_every_group(self):
         from textual.widgets import OptionList

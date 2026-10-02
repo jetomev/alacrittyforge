@@ -41,7 +41,7 @@ class Case(unittest.TestCase):
         self.cfg = self.home / "alacritty.toml"
         self.cfg.write_text(f'[general]\nimport = ["{self.tdir}/KognogOS-theme.toml", "{self.home}/extra.toml"]\n'
                             '\n[colors.primary]\nbackground = "#000000"\n')
-        self.s = Session.load(self.cfg, backup_dir=self.home / "bk")
+        self.s = Session.load(self.cfg, backup_dir=self.home / "bk", version=(0, 17, 0))
 
     def tearDown(self):
         self._tmp.cleanup()
