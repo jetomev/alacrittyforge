@@ -6,7 +6,7 @@
 
 ## Next — the grubForge 2.0 look (Javier, 2026-10-02)
 Same method as grubForge 2.0, which worked:
-- [ ] Project kit first: `CLAUDE.md` (how it builds, tests, ships), this TODO, check GitHub (About, topics) and the Vault folder
+- [x] Project kit: `CLAUDE.md` + this TODO (2 Oct); GitHub About/topics checked; Vault folder exists
 - [ ] Research: inventory of every screen and setting today, and what forgekit 0.5.0 already gives (SettingRow, Toggle/Choices/CheckList/NumberPresets, FilterPicker, ChangesBar, HintBar, Notice, Review/Progress, Manual, closing note)
 - [ ] Design: screen-by-screen plan as a page Javier approves **before any code**; known values picked, not typed; Save with a review first; a manual inside the app; readable on a text console and at 100 columns
 - [ ] Build on the 0.5.0 pieces; tests per screen (incl. the 100-column checks); Javier's own run; release (GitHub + AUR)
