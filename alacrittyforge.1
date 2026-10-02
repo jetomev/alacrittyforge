@@ -1,121 +1,176 @@
 .\" alacrittyforge.1 — alacrittyForge man page
 .\" GNU GPL v3 — see LICENSE
-.TH ALACRITTYFORGE 1 "May 2026" "alacrittyForge v0.1.1" "User Commands"
+.TH ALACRITTYFORGE 1 "October 2026" "alacrittyForge v1.0.0" "User Commands"
 .
 .SH NAME
-alacrittyforge \- terminal UI for managing Alacritty configuration
+alacrittyforge \- Alacritty's settings, without editing the file by hand
 .
 .SH SYNOPSIS
 .B alacrittyforge
+.br
+.B alacrittyforge \-\-version
+.br
+.B alacrittyforge \-\-help
 .
 .SH DESCRIPTION
 .B alacrittyForge
-is a Catppuccin Mocha–themed terminal UI for viewing, editing, and backing up
-the Alacritty terminal emulator's TOML configuration. It writes only to your
-user-space config at
-.IR ~/.config/alacritty/alacritty.toml ,
-with timestamped backups in
-.IR ~/.config/alacritty/backups/ ;
-no root privileges are required.
-
-The application is organized around five screens, switchable from the sidebar
-or with the number keys:
+is a keyboard-driven terminal application for the settings of the
+.BR alacritty (1)
+terminal. Every setting has a plain name and an explanation, known values
+are picked from lists and presets, and every change is reviewed
+(old \(-> new) and backed up before it is written.
+.PP
+A save touches only the settings that changed: comments and layout in
+.I alacritty.toml
+are kept. The new file is checked, written next to the old one and swapped
+in, so it is never left half-written; a file that is a symbolic link stays
+one. A file that cannot be read is never saved over.
+.PP
+Alacritty picks a saved change up by itself, in every open window, unless
+.I general.live_config_reload
+is off. alacrittyForge reads
+.B alacritty \-\-version
+and writes the setting names that version reads (Alacritty 0.14 moved
+.IR import ,
+.IR working_directory ,
+.IR live_config_reload ,
+.I ipc_socket
+into
+.I [general]
+and
+.I shell
+into
+.IR [terminal] ).
+.PP
+No root privileges are needed: alacrittyForge only changes the user's own
+files.
+.PP
+The full manual is inside the application (press
+.BR M ,
+or
+.B F1
+on a setting for its page) and in
+.I /usr/lib/alacrittyforge/alacrittyforge/manual/
+as Markdown.
+.
+.SH OPTIONS
 .TP
-.B 1 — Dashboard
-System overview: config status, active theme, font, opacity, backup count.
+.B \-\-version
+Print the version and exit.
 .TP
-.B 2 — Config Editor
-Browse and edit all alacritty.toml settings with live validation.
+.B \-\-help
+Print the usage and exit.
+.
+.SH SCREENS
 .TP
-.B 3 — Themes
-Browse, preview, and apply installed Alacritty color themes.
+.B 1 \- Overview
+Your terminal at a glance; what needs attention (a file that cannot be
+read, settings with old names, settings Alacritty does not know, no
+monospace font), with the button that fixes it; safety; common tasks.
 .TP
-.B 4 — Fonts
-View and edit font family / style / size with a side panel of system fonts.
+.B 2 \- Settings
+Every Alacritty setting on Linux in eight groups: Window, Text, Cursor,
+Scrolling & copy, Bell, Shell & start, Mouse & links, Advanced. A setting
+the file does not set shows what Alacritty does instead.
 .TP
-.B 5 — Key Bindings
-View default + user-defined bindings, add custom bindings, delete user ones.
+.B 3 \- Themes
+Theme files in
+.I ~/.config/alacritty/themes
+with a preview in their colours; use one, adjust its colours (saved as your
+own copy), install one. Files another tool maintains are locked.
+.TP
+.B 4 \- Shortcuts
+Your keyboard shortcuts and Alacritty's own, in words. Add one by pressing
+its keys; turn off one of Alacritty's.
+.TP
+.B 5 \- Backups
+Why each backup was made and what restoring it would change.
 .
 .SH KEYBINDINGS
-.SS Global (any screen)
 .TP
-.B 1 .. 5
-Switch to the corresponding screen.
+.B Tab ", " Shift+Tab
+Next / previous field or button.
+.TP
+.B Enter
+Open a list, press a button, confirm.
+.TP
+.B Space
+Flip a switch.
+.TP
+.B Up ", " Down
+In a number: step through its presets.
+.TP
+.B Esc
+Close a window.
+.TP
+.B 1 \(en 5 ", " Ctrl+letter
+Go to a screen.
+.TP
+.B F10 ", " S
+Save, with a review first.
 .TP
 .B R
-Refresh the current screen's view from disk.
+Read the file again; unsaved changes stay.
+.TP
+.B F1
+Help on what is selected.
+.TP
+.B M
+The manual.
 .TP
 .B ?
-Toggle the help overlay (press again, or Esc, q, or ? to close).
+All keys.
 .TP
-.B q
-Quit.
-.
-.SS Config Editor and Fonts
+.B Q ", " Ctrl+Q
+Quit; asks first if something is not saved.
 .TP
-.B E
-Edit the selected value (focuses the input).
+.B Enter ", " A ", " I
+Themes: use a theme, adjust its colours, install one.
 .TP
-.B S
-Save all pending changes (with confirmation; auto-backs-up first).
-.
-.SS Themes
+.B + ", " F2 ", " Delete
+Shortcuts: add, change, remove.
 .TP
-.B A
-Apply the selected theme (with confirmation).
-.TP
-.B F5
-Rescan the themes directory.
-.TP
-.B H
-Toggle the theme installation guide.
-.
-.SS Key Bindings
-.TP
-.B N
-Add a new binding from the input fields.
-.TP
-.B D
-Delete the selected user-defined binding.
-.
-.SH SAFETY
-Every write to
-.I alacritty.toml
-goes through three layers:
-.IP \(bu 2
-.B Validation
-— input is checked before being staged.
-.IP \(bu 2
-.B Confirmation
-— a modal dialog asks before any disk write (Esc cancels, Enter confirms).
-.IP \(bu 2
-.B Backup
-— a timestamped copy of the current config is written to
-.I ~/.config/alacritty/backups/
-before every modification. Up to 20 backups are kept (FIFO).
+.B R ", " N ", " D
+Backups: restore, back up now, delete.
 .
 .SH FILES
 .TP
 .I ~/.config/alacritty/alacritty.toml
-Alacritty's user configuration file. alacrittyForge reads and writes here.
-.TP
-.I ~/.config/alacritty/backups/
-Timestamped auto-backups created before every write.
+Alacritty's settings. Read and written by alacrittyForge.
 .TP
 .I ~/.config/alacritty/themes/
-Directory scanned for installed color themes.
+Theme files.
+.TP
+.I ~/.config/alacritty/backups/
+Backups (the newest 20), each with a note saying why it was made.
+.TP
+.I ~/.local/share/alacrittyforge/logs/
+One line per run, by day.
 .
-.SH AUTHORS
-Co-developed by Javier
-.RB ( jetomev )
-and Claude (Anthropic). alacrittyForge is part of the
-.B Forge
-suite (alongside grubForge) that ships with KognogOS.
-.
-.SH COPYRIGHT
-Copyright \(co 2026 Javier (jetomev). License: GNU GPL v3. This is free software;
-see the source for copying conditions. There is NO warranty.
+.SH REQUIREMENTS
+Linux with Alacritty 0.13 or newer; Python 3.11 or newer; python-textual,
+python-rich, python-tomlkit and python-forgekit 0.5.1 or newer; fontconfig.
 .
 .SH SEE ALSO
 .BR alacritty (1),
-.BR grubforge (1)
+.BR alacritty (5),
+.BR alacritty-bindings (5),
+.BR fc-list (1)
+.
+.SH AUTHORS
+.B jetomev
+\(em idea, vision, direction, testing
+.PP
+.B Claude (Anthropic)
+\(em co-developer, architecture, implementation
+.
+.SH LICENSE
+alacrittyForge is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License v3.0 as published by
+the Free Software Foundation.
+.PP
+See
+.I /usr/share/licenses/alacrittyforge/LICENSE
+or
+.UR https://www.gnu.org/licenses/gpl-3.0.html
+.UE
