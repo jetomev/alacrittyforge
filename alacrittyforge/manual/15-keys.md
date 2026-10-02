@@ -28,6 +28,12 @@
 - **F2** or **Enter**: change one of yours
 - **Delete**: remove one of yours
 
+## Backups
+
+- **R**: restore the backup you picked (asks first)
+- **N**: back up now
+- **D**: delete the backup you picked (asks first)
+
 Letter keys never act while you're typing in a field.
 
 ## From the terminal

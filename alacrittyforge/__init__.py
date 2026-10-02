@@ -1,9 +1,8 @@
-# ═══════════════════════════════════════════════════════════
-#  AlacrittyForge
-#  A TUI for managing Alacritty terminal configuration.
-#  https://github.com/jetomev/alacrittyforge
-# ═══════════════════════════════════════════════════════════
+"""alacrittyForge — Alacritty's settings, without editing the file by hand.
+
+Part of the Forge Suite for KognogOS. https://github.com/jetomev/alacrittyforge
+"""
 
 __version__ = "1.0.0-dev"
-__author__  = "jetomev"
+__author__ = "jetomev"
 __license__ = "GPL-3.0"

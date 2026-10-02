@@ -1,9 +1,26 @@
 # Backups and undo
 
-Every save makes **one backup** of your settings file first, however many changes it holds. They go to `~/.config/alacritty/backups/`, and the newest **20** are kept.
+Every save makes **one backup** of your settings file first, however many changes it holds. They're kept in `~/.config/alacritty/backups/`; the newest **20** stay. On the **Backups** screen (press **5**).
 
-- The **Overview** shows how many there are and when the newest was made. **Back up now** makes one whenever you like.
-- If your settings file ever can't be read, the Overview offers **Restore the newest backup**. What's there now is backed up first, so nothing is lost.
-- Backups made by earlier versions of alacrittyForge are kept and listed too.
+## See what a backup would bring back
 
-To undo a change you just saved, change it back and save again.
+Pick a backup in the list. The box on the right, **Restoring this would change**, lists every difference from today's settings in words, like **Opacity 70 % → 95 %**. When a backup is the same as today, it says so.
+
+Each backup says why it was made: **Before a save**, **Before restoring a backup**, **Before using a theme (…)**, or **Made by you**.
+
+## Restore one
+
+1. Pick it and press **R** (or **Restore…**).
+2. The window starts on **Cancel**; choose **Restore** to go ahead.
+
+What's there now is backed up first, so a restore can be undone the same way. Alacritty uses the restored settings straight away. If you had unsaved changes, they're dropped.
+
+## Other things you can do
+
+- **N** or **Back up now**: make a backup whenever you like.
+- **Show whole file**: read the backup exactly as it was saved.
+- **D** or **Delete…**: delete a backup for good (the window starts on **Cancel**).
+
+If your settings file ever can't be read, the **Overview** offers **Restore the newest backup** too.
+
+Backups made by earlier versions of alacrittyForge are kept and listed.

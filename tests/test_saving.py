@@ -163,6 +163,14 @@ class Backups(Case):
         (self.bk / "alacritty_20260809_203521_374190.note").write_text("pre-theme-KognogOS-theme")
         self.assertEqual(backups.list_all(self.bk)[0].why, "Before using a theme (KognogOS-theme)")
 
+    def test_a_backup_is_dated_when_it_was_made_not_when_settings_changed(self):
+        # copying keeps the file's time; 0.2.0's list showed the settings' last edit
+        os.utime(self.cfg, (0, 946684800))                      # settings last edited in 2000
+        made = self.save({"font.size": 13.0}).backup
+        listed = backups.list_all(self.bk)[0]
+        self.assertEqual(listed.path, made)
+        self.assertGreater(listed.made.year, 2020)
+
     def test_restore_puts_it_back_and_backs_up_today_first(self):
         self.save({"font.size": 16.0})
         first = backups.list_all(self.bk)[0]

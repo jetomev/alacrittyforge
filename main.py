@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
 """alacrittyForge — run with `python main.py`, or `alacrittyforge` once installed."""
 
-from alacrittyforge.app import AlacrittyForgeApp
+import sys
 
-
-def main() -> None:
-    AlacrittyForgeApp().run()
-
+from alacrittyforge.cli import main
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

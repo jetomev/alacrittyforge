@@ -33,6 +33,7 @@ from .settings_file import Unreadable
 from .settings_spec import BY_KEY, default_words
 from .ui.overview import OverviewScreen
 from .ui.settings import SettingsScreen
+from .ui.backups import BackupsScreen
 from .ui.shortcuts import ShortcutsScreen
 from .ui.themes import ThemesScreen
 
@@ -57,7 +58,6 @@ AF_CSS = FORGE_CSS + """
 .af-att-head { height: auto; }
 .af-att-body { height: auto; padding: 0 0 0 3; margin: 0 0 1 0; }
 .af-att-body:last-child { margin: 0; }
-.af-soon { padding: 1 2; }
 #sec-themes { padding: 0 2 0 0; }
 #th-left { width: 36; height: 1fr; }
 #th-list { height: 1fr; max-height: 20; border: solid $forge-field-border; background: $forge-bg; }
@@ -76,6 +76,15 @@ AF_CSS = FORGE_CSS + """
 #ad-preview { height: auto; margin: 1 0 0 0; }
 #ad-body { height: auto; max-height: 55vh; }
 #sec-shortcuts { padding: 0 2 0 0; }
+#sec-backups { padding: 0 2 0 0; }
+#bk-left { width: 1fr; min-width: 46; height: 1fr; }
+#bk-table { height: auto; max-height: 14; border: solid $forge-field-border; background: $forge-bg; }
+#bk-table:focus { border: solid $forge-accent; }
+#bk-where { height: auto; padding: 1 0 0 0; }
+.bk-actions { padding: 1 0 0 0; align-horizontal: left; height: auto; }
+.forge-buttons.bk-actions Button { margin: 0 2 0 0; width: 1fr; min-width: 0; padding: 0 1; }
+.forge-buttons.bk-actions Button:last-child { margin: 0; }
+#bk-right { width: 1fr; max-width: 64; height: auto; max-height: 1fr; margin: 2 0 0 2; }
 #sc-table { height: 1fr; max-height: 18; border: solid $forge-field-border; background: $forge-bg; }
 #sc-table:focus { border: solid $forge-accent; }
 .sc-actions { padding: 1 0 0 0; align-horizontal: left; height: auto; }
@@ -134,18 +143,6 @@ class FieldHelp(ForgePanelScreen):
 
     def compose_body(self) -> ComposeResult:
         yield Static(self._text)
-
-
-class Soon(VerticalScroll, can_focus=False):
-    """A screen not built yet in this step."""
-
-    def __init__(self, title: str, text: str, **kw) -> None:
-        super().__init__(**kw)
-        self._title, self._text = title, text
-
-    def compose(self) -> ComposeResult:
-        yield Static(f"[b $forge-title-accent]{self._title}[/]\n\n[$forge-muted]{escape(self._text)}[/]",
-                     classes="af-soon")
 
 
 class AlacrittyForgeApp(ForgeApp):
@@ -212,8 +209,7 @@ class AlacrittyForgeApp(ForgeApp):
         yield SettingsScreen(self.session, id="sec-settings")
         yield ThemesScreen(self.session, id="sec-themes")
         yield ShortcutsScreen(self.session, id="sec-shortcuts")
-        yield Soon("Backups", "Coming in step 5: why each backup was made, and what restoring it would change.",
-                   id="sec-backups")
+        yield BackupsScreen(self.session, id="sec-backups")
 
     def on_mount(self) -> None:
         super().on_mount()
@@ -242,6 +238,9 @@ class AlacrittyForgeApp(ForgeApp):
         if section_id == "shortcuts":
             self.query_one(ShortcutsScreen).refresh_view()
             self.query_one("#sc-table").focus()
+        if section_id == "backups":
+            self.query_one(BackupsScreen).refresh_view()
+            self.query_one("#bk-table").focus()
 
     def on_action(self, action_id: str) -> None:
         if action_id == "manual":
@@ -352,6 +351,7 @@ class AlacrittyForgeApp(ForgeApp):
         self.query_one(SettingsScreen).sync()
         self.query_one(ThemesScreen).refresh_view()
         self.query_one(ShortcutsScreen).refresh_view()
+        self.query_one(BackupsScreen).refresh_view()
         self.refresh_state()
         self.query_one(OverviewScreen).refresh_view()
         self.notify("Saved. Alacritty is using it now." if s.live_reload() else
@@ -378,8 +378,12 @@ class AlacrittyForgeApp(ForgeApp):
         self.notify("Read the file again. Your unsaved changes are kept.")
 
     def after_file_changed(self) -> None:
+        """Something wrote the file (a restore): read it again and redraw everything."""
         self.session.reload()
         self.query_one(SettingsScreen).sync()
+        self.query_one(ThemesScreen).refresh_view()
+        self.query_one(ShortcutsScreen).refresh_view()
+        self.query_one(BackupsScreen).refresh_view()
         self.query_one(OverviewScreen).refresh_view()
         self.refresh_state()
 

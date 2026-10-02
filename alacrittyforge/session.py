@@ -61,6 +61,7 @@ class Session:
     saved_at: dt.datetime | None = None
     saves: list[str] = field(default_factory=list)      # for the closing note
     last_backup: Path | None = None
+    started: dt.datetime = field(default_factory=dt.datetime.now)
 
     @classmethod
     def load(cls, path: Path = CONFIG_PATH, backup_dir: Path | None = None,
@@ -193,6 +194,19 @@ class Session:
         self.saves.append(f"Saved {n} change{'s' if n != 1 else ''} at {self.saved_at:%I:%M %p}.")
         self.reload()
         return r
+
+    def summary(self) -> tuple[str, list[str], str]:
+        """(heading, lines, level) for the closing note in the terminal."""
+        lines = list(self.saves)
+        if self.saves:
+            lines.append("Alacritty is already using them." if self.live_reload() else
+                         "They show the next time Alacritty opens.")
+            if self.last_backup:
+                lines.append(f"Newest backup: {self.last_backup.name}")
+            return "Done · saved", lines, "ok"
+        if self.change_count:
+            return "Done · nothing was written", ["Unsaved changes were dropped when you quit."], "warn"
+        return "Done · nothing was changed", ["Your settings are as they were."], "ok"
 
     # ── what needs attention ─────────────────────────────────────────────
     def misnamed(self) -> dict[str, str]:

@@ -10,6 +10,7 @@ within a second, and a restore that goes through the same safe write.
 from __future__ import annotations
 
 import os
+import re
 import shutil
 from dataclasses import dataclass
 from datetime import datetime
@@ -50,6 +51,24 @@ class Backup:
         return _note_path(self.path)
 
 
+_STAMP = re.compile(r"alacritty_(\d{8})_(\d{6})_")
+
+
+def made_at(p: Path) -> datetime | None:
+    """When the backup was made: from its name. The file's own time is the
+    settings file's last edit, because copying keeps it (0.2.0 showed that)."""
+    m = _STAMP.match(p.name)
+    if m:
+        try:
+            return datetime.strptime(m.group(1) + m.group(2), "%Y%m%d%H%M%S")
+        except ValueError:
+            pass
+    try:
+        return datetime.fromtimestamp(p.stat().st_mtime)
+    except OSError:
+        return None
+
+
 def _note_path(p: Path) -> Path:
     return p.with_suffix("").with_suffix(".note")
 
@@ -80,16 +99,15 @@ def list_all(backup_dir: Path | None = None) -> list[Backup]:
         return []
     out = []
     for p in d.glob("alacritty_*.bak.toml"):
-        try:
-            made = datetime.fromtimestamp(p.stat().st_mtime)
-        except OSError:
+        made = made_at(p)
+        if made is None:
             continue
         try:
             note = _note_path(p).read_text(encoding="utf-8").strip()
         except OSError:
             note = ""
         out.append(Backup(p, made, note))
-    return sorted(out, key=lambda b: b.made, reverse=True)
+    return sorted(out, key=lambda b: (b.made, b.path.name), reverse=True)
 
 
 def prune(backup_dir: Path | None = None) -> None:

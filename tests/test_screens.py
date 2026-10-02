@@ -282,8 +282,54 @@ class Screens(unittest.IsolatedAsyncioTestCase):
                 self.assertTrue(b.region.height and b.region.bottom <= 25, f"{bid} is off the screen")
             self.assertEqual(app.screen.query_one("#sd-body").scroll_y, 0)   # "1  The keys" in view
 
+    async def test_backups_say_what_a_restore_would_change_and_ask_first(self):
+        from forgekit import ConfirmDialog
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.4)
+            app.session.set("window.opacity", 0.7)
+            app.session.save()                                  # backup = the 95 % file
+            app.after_file_changed()
+            await pilot.press("5")
+            await pilot.pause(0.5)
+            diff = str(app.query_one("#bk-diff").render())
+            self.assertIn("Opacity", diff)
+            self.assertIn("70 %", diff)
+            self.assertIn("95 %", diff)
+            await pilot.press("r")
+            await pilot.pause(0.4)
+            self.assertIsInstance(app.screen, ConfirmDialog)
+            await pilot.press("enter")                          # starts on Cancel
+            await pilot.pause(0.4)
+            self.assertIn("opacity = 0.7", self.cfg.read_text())
+            await pilot.press("r")
+            await pilot.pause(0.4)
+            app.screen.query_one("#ok").press()
+            await pilot.pause(0.5)
+            self.assertIn("opacity = 0.95", self.cfg.read_text())
+            self.assertEqual(app.session.value("window.opacity"), 0.95)
+
+    async def test_the_closing_note_says_what_was_saved(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.4)
+            heading, lines, level = app.session.summary()
+            self.assertEqual((heading, level), ("Done · nothing was changed", "ok"))
+            app.session.set("font.size", 14.0)
+            app.session.save()
+            heading, lines, _l = app.session.summary()
+            self.assertEqual(heading, "Done · saved")
+            self.assertTrue(lines[0].startswith("Saved 1 change at"))
+            self.assertIn("Alacritty is already using them.", lines)
+
     async def test_every_button_label_fits_at_100_columns(self):
         from textual.widgets import Button
+        from alacrittyforge import backups
+        # a backup with a long reason, which made Backups' list scroll sideways
+        self.cfg.write_text(SAMPLE.replace("~/.config/alacritty/themes", str(self.tdir)))
+        made = backups.create("pre-theme-a-theme-with-quite-a-long-name-indeed", path=self.cfg,
+                              backup_dir=self.dir / "bk")
+        self.assertIsNotNone(made)
         app = self.app()
         async with app.run_test(size=(100, 30)) as pilot:
             for key in "12345":
