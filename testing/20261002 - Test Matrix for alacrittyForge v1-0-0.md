@@ -2,6 +2,21 @@
 
 Design: `docs/design/v1.0.0-screens.html` (Javier's rulings, 2 Oct 2026). Filled section by section as the steps are built. Each result was read from the run itself, not assumed.
 
+## 1–8 · Built and checked by Claude (2 Oct 2026)
+
+Automated: **80 tests**, all passing (also inside the AUR build, and in the four distribution VMs). Each fix was checked against the old code, where its test fails.
+
+| ID | Area | Proven by | Result |
+|---|---|---|---|
+| 1 | Safe saving: one line per change, notes and layout kept, cleared setting removed, never over an unreadable file, one backup per save, 20 kept, written in one step, links followed, permissions kept, changes made elsewhere kept, old names moved | `tests/test_saving.py`; a copy of Javier's real file: one change = one changed line | **PASS** |
+| 2 | Overview: your terminal, needs attention (unreadable file → restore, old names → update, unknown settings, no font, live reload off), safety, tasks | `test_screens.py`; real-file render | **PASS** |
+| 3 | Settings: ~60 settings, 8 groups, nothing changed at start or after visiting every group, Alacritty's own value leaves a setting unset, a change marked and reviewed, every row fits at 100 columns | `test_session.py`, `test_screens.py` | **PASS** |
+| 4 | Themes: in use first, preview, hypeForge's locked (never written), use = imports + own colours out, Adjust colours → own copy only on save, installs colour-only files, Adjust colours fits a 25-line console | `test_themes.py`, `test_screens.py` | **PASS** |
+| 5 | Shortcuts: in words (Esc, Enter named), 96 Linux defaults from Alacritty's manual, turn off/on leaves no change, record Ctrl+T (also a screen key), every field kept, window fits 25 lines | `test_bindings.py`, `test_screens.py` | **PASS** |
+| 6 | Backups: dated when made, plain reasons, what a restore would change, restore/delete start on Cancel, long reasons fit | `test_saving.py`, `test_screens.py`; real backups render | **PASS** |
+| 7 | Manual: a page per group and screen, every setting named on its page, links, F1 lands right | `test_manual.py` | **PASS** |
+| 8 | Text console (100×30) every screen: console font only, nothing invisible; nothing cut off at 100 columns | forgekit `console-preview.py`; `*_100_columns` tests | **PASS** |
+
 ## 9 · Every major distribution, the same (Javier, 2 Oct: "check alacritty functionality in all major linux distros, all the same")
 
 Run in the grubForge test VMs (cloud images, UEFI, snapshot `fresh`), as root, with `scripts/vm-distro-check.py`:
@@ -22,3 +37,25 @@ Run in the grubForge test VMs (cloud images, UEFI, snapshot `fresh`), as root, w
 - **F-2:** a minimal openSUSE install has no font at all; Alacritty then refuses to start ("font monospace not found"). The Overview now says so, with the package to install; it says nothing when fonts can't be listed at all, so it never warns falsely.
 
 **Test-environment notes** (the VMs, not alacrittyForge): the cloud images lack the X11 runtime libraries winit loads (libxkbcommon-x11, libXcursor, libXi, libXrandr), so Alacritty first failed with "NotSupported" before even reading its config; Xvfb needs 24-bit colour. A first version of the check counted that failed start as "warned (good)"; it now counts a warning only when Alacritty really ran.
+
+## 10 · Javier's run (KognogOS VM, at the keyboard)
+
+Setup by Claude (2 Oct, done): `kognog-hypeforge` from `clean-install-3` (alacrittyForge 0.2.0, forgekit 0.3.0, Alacritty 0.17), brought up to date (`pacman -Syu fakeroot`, the step nog 1.5.5 itself names), then **with nog**: `nog install python-tomlkit`, and `nog install ./python-forgekit-0.5.1rc1… ./alacrittyforge-1.0.0rc1…` (upgrades). Built by `scripts/make-rc-packages.sh` from `ac29f4d` / forgekit `c8967b2`; the build ran all 80 tests. A headless check as the user: nothing pending at start, Alacritty 0.17 found. Saved as snapshot **`alacrittyforge-1.0.0rc1`**.
+
+| ID | Task | EXPECT | Result | Notes |
+|---|---|---|---|---|
+| 10.1 | `alacrittyforge --version`, then `alacrittyforge` | the version; the Overview | — | |
+| 10.2 | Overview | Alacritty 0.17, the theme, the font; "Nothing needs attention" | — | |
+| 10.3 | Settings ▸ Window: Opacity preset 90, F10, Save | the review (95/100 → 90); an open Alacritty window turns see-through at once | — | the real proof |
+| 10.4 | Settings ▸ Text: Size preset 14, F10, Save | open Alacritty windows' text grows | — | |
+| 10.5 | Settings ▸ Text: Font → Choose a font…, type part of a name, pick one, Save | the font changes in Alacritty | — | |
+| 10.6 | Themes: pick a hypeForge theme, Enter, F10, Save | Alacritty's colours change; the hypeForge file is untouched | — | |
+| 10.7 | Themes: A (Adjust colours), change Red, Keep, F10, Save | a "(mine)" copy appears and is in use | — | |
+| 10.8 | Shortcuts: + , press Ctrl+Shift+T, An action "Open a new window", Add it, F10, Save; then press Ctrl+Shift+T in Alacritty | a new Alacritty window opens | — | |
+| 10.9 | Shortcuts: pick one of Alacritty's, Turn this one off, Save | that key types as normal in Alacritty | — | |
+| 10.10 | Backups: pick the oldest, look at "Restoring this would change", R, Restore | Alacritty goes back to how it was | — | |
+| 10.11 | Change something, then Q | "Before you go" asks; quitting prints the closing note | — | |
+| 10.12 | M, and F1 on a setting | the manual, on the right page | — | |
+| 10.13 | Ctrl+Alt+F3, log in, `alacrittyforge` | readable and usable on the text console | — | |
+| 10.14 | Anything that looks wrong, reads badly, or is slow | noted here as F-n | — | |
+
