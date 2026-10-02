@@ -67,7 +67,9 @@ class Session:
         """Read the file again (it may have changed elsewhere); your unsaved
         changes stay, except those that now match the file."""
         self.file = SettingsFile.load(self.path)
-        self.pending = {k: v for k, v in self.pending.items() if not same(v, self.original(k))}
+        self.pending = {k: v for k, v in self.pending.items()
+                        if not same(v, shell_program(self.original(k)) if k == "terminal.shell"
+                                    else self.original(k))}
 
     # ── reading ──────────────────────────────────────────────────────────
     @property
@@ -94,7 +96,11 @@ class Session:
     # ── changing ─────────────────────────────────────────────────────────
     def set(self, key: str, value: Any) -> bool:
         """Stage a change. True when it differs from the file."""
-        if same(value, self.original(key)):
+        orig = self.original(key)
+        if key == "terminal.shell":
+            # the file may hold {program, args}; the screen picks the program
+            orig = shell_program(orig)
+        if same(value, orig):
             self.pending.pop(key, None)
             return False
         self.pending[key] = REMOVE if value is None else value

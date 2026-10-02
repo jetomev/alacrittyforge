@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
-# ═══════════════════════════════════════════════════════════
-#  AlacrittyForge — Entry Point
-#  Run with: python main.py
-#  or after install: alacrittyforge
-# ═══════════════════════════════════════════════════════════
+"""alacrittyForge — run with `python main.py`, or `alacrittyforge` once installed."""
 
-import sys
-from alacrittyforge.app import AlacrittyForge
+from alacrittyforge.app import AlacrittyForgeApp
 
 
 def main() -> None:
-    """Launch the AlacrittyForge TUI application."""
-    app = AlacrittyForge()
-    app.run()
+    AlacrittyForgeApp().run()
 
 
 if __name__ == "__main__":

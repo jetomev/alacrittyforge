@@ -93,6 +93,11 @@ class TheSession(unittest.TestCase):
         self.assertEqual(self.s.changes(), [("Opacity", "95 %", "90 %"),
                                             ("Shape", "not set (Block)", "Beam")])
 
+    def test_the_shell_as_a_table_is_no_change(self):
+        # the file says [terminal.shell] program = ...; the screen picks the program
+        self.assertFalse(self.s.set("terminal.shell", "/usr/bin/fish"))
+        self.assertEqual(self.s.pending, {})
+
     def test_changing_the_shell_keeps_its_options(self):
         self.s.set("terminal.shell", "/usr/bin/bash")
         self.s.save()

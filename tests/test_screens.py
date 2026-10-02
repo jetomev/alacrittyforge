@@ -1,0 +1,179 @@
+"""The screens, headless (v1.0.0). Needs Textual and forgekit; no Alacritty.
+
+Ported from grubForge 2.0's screen tests: nothing changed at start, nothing
+cut off at 100 columns, and a file that can't be read can't be saved over.
+"""
+
+from __future__ import annotations
+
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from alacrittyforge.session import Session  # noqa: E402
+
+SAMPLE = '''# mine
+[env]
+TERM = "xterm-256color"
+
+[terminal.shell]
+program = "/usr/bin/fish"
+
+[window]
+decorations = "Full"
+opacity = 0.95
+blur = true
+
+[window.dimensions]
+columns = 150
+lines = 50
+
+[window.padding]
+x = 15
+y = 15
+
+[font]
+size = 12.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+style = "Regular"
+
+[font.bold]
+family = "JetBrainsMono Nerd Font"
+style = "Bold"
+
+[cursor]
+blink_interval = 500
+
+[cursor.style]
+shape = "Block"
+blinking = "On"
+
+[general]
+import = ["~/.config/alacritty/themes/KognogOS-theme.toml"]
+'''
+
+
+class Screens(unittest.IsolatedAsyncioTestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self._tmp.name)
+        self.cfg = self.dir / "alacritty.toml"
+        self.cfg.write_text(SAMPLE)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def app(self, text: str | None = None):
+        from alacrittyforge.app import AlacrittyForgeApp
+        if text is not None:
+            self.cfg.write_text(text)
+        return AlacrittyForgeApp(session=Session.load(self.cfg, backup_dir=self.dir / "bk"))
+
+    async def test_nothing_is_changed_at_start_or_after_visiting_every_group(self):
+        from textual.widgets import OptionList
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.6)
+            self.assertEqual(app.session.pending, {})          # on the Overview
+            await pilot.press("2")
+            await pilot.pause(0.5)
+            groups = app.query_one("#af-groups", OptionList)
+            for i in range(groups.option_count):
+                groups.highlighted = i
+                await pilot.pause(0.3)
+            self.assertEqual(app.session.pending, {})
+
+    async def test_picking_alacrittys_own_value_leaves_it_unset(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.5)
+            await pilot.press("2")
+            await pilot.pause(0.4)
+            row = app.query_one("#row-bell-duration")
+            row.control.set_value(100)
+            await pilot.pause(0.2)
+            self.assertEqual(app.session.pending, {"bell.duration": 100})
+            row.control.set_value(0)                            # Alacritty's default
+            await pilot.pause(0.2)
+            self.assertEqual(app.session.pending, {})
+
+    async def test_a_change_is_marked_and_saved_with_a_review(self):
+        from forgekit import ReviewDialog
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.5)
+            await pilot.press("2")
+            await pilot.pause(0.4)
+            app.query_one("#row-window-opacity").control.set_value(90)
+            await pilot.pause(0.3)
+            self.assertEqual(app.session.pending, {"window.opacity": 0.9})
+            note = str(app.query_one("#row-window-opacity").query_one(".forge-setting-note").render())
+            self.assertIn("was: 95 %", note)
+            await pilot.press("f10")
+            await pilot.pause(0.5)
+            self.assertIsInstance(app.screen, ReviewDialog)
+            app.screen.query_one("#save").press()
+            await pilot.pause(0.5)
+            text = self.cfg.read_text()
+            self.assertIn("opacity = 0.9\n", text)
+            self.assertIn("# mine", text)
+            self.assertEqual(app.session.pending, {})
+
+    async def test_a_file_that_cant_be_read_is_never_saved_over(self):
+        broken = SAMPLE.replace('decorations = "Full"', "decorations = Full")
+        app = self.app(broken)
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.5)
+            await pilot.press("2")
+            await pilot.pause(0.4)
+            self.assertTrue(app.query_one("#row-window-opacity").control.disabled)
+            app.session.pending["window.opacity"] = 0.5       # even if a change got in
+            await pilot.press("f10")
+            await pilot.pause(0.5)
+            self.assertEqual(self.cfg.read_text(), broken)
+
+    async def test_every_button_label_fits_at_100_columns(self):
+        from textual.widgets import Button
+        app = self.app()
+        async with app.run_test(size=(100, 30)) as pilot:
+            for key in "12345":
+                await pilot.press(key)
+                await pilot.pause(0.5)
+                for b in app.screen.query(Button):
+                    if not b.display or not b.region.width:
+                        continue
+                    drawn = b.render_line(0).text
+                    self.assertIn(str(b.label), drawn, f"screen {key}: {str(b.label)!r} drawn as {drawn!r}")
+                    self.assertLessEqual(b.region.right, b.parent.region.right,
+                                         f"screen {key}: {str(b.label)!r} runs past its row")
+                for w in app.screen.query("*"):
+                    self.assertFalse(w.display and w.show_horizontal_scrollbar,
+                                     f"screen {key}: {w!r} scrolls sideways")
+
+    async def test_every_setting_row_fits_at_100_columns(self):
+        from textual.widgets import OptionList
+        app = self.app()
+        async with app.run_test(size=(100, 30)) as pilot:
+            await pilot.press("2")
+            await pilot.pause(0.5)
+            groups = app.query_one("#af-groups", OptionList)
+            for i in range(groups.option_count):
+                groups.highlighted = i
+                await pilot.pause(0.4)
+                for row in app.screen.query(".forge-setting"):
+                    if row.display and row.region.width:
+                        line = row.query_one(".forge-setting-line")
+                        self.assertLessEqual(row.control.region.right, line.region.right,
+                                             f"group {i}: {row.setting} runs past its row")
+                for w in app.screen.query("*"):
+                    self.assertFalse(w.display and w.show_horizontal_scrollbar,
+                                     f"group {i}: {w!r} scrolls sideways")
+
+
+if __name__ == "__main__":
+    unittest.main()
