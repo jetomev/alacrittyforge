@@ -18,6 +18,14 @@ from forgekit import glyph
 
 from .. import backups
 from ..alacritty import shown_version
+from ..session import monospace_families
+
+
+def fonts_missing() -> bool:
+    """True only when fonts could be listed and none is monospace (found on a
+    minimal openSUSE install, where Alacritty then refuses to start)."""
+    found = monospace_families()
+    return found is not None and not found
 
 
 def when(t: dt.datetime | None) -> str:
@@ -119,6 +127,10 @@ class OverviewScreen(VerticalScroll, can_focus=False):
                           f"{'s' if len(unknown) != 1 else ''} Alacritty doesn't know",
                           f"{escape(', '.join(unknown[:4]))}{'…' if len(unknown) > 4 else ''}. It ignores "
                           "them; often a misspelling."))
+        if s.readable and fonts_missing():
+            items.append((f"{warn} [b]No monospace font is installed.[/]",
+                          "Alacritty can't open without one. Install one, for example DejaVu Sans Mono "
+                          "(the package is usually called fonts-dejavu or dejavu-fonts)."))
         if s.names.version is None:
             items.append((f"[$forge-info]{glyph('info')}[/] Alacritty isn't installed",
                           "alacrittyForge can still prepare its settings; they'll be used once it is."))

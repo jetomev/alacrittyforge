@@ -24,3 +24,7 @@ On **Size**, pick a preset (**10 11 12 13 14 16**) or type any size, like **11.5
 - **Bold text in bright colours**: show bold text in the brighter version of its colour.
 
 Alacritty names on this page: `font.normal.family`, `font.normal.style`, `font.size`, `font.bold.family`, `font.italic.family`, `font.bold_italic.family`, `font.offset`, `font.builtin_box_drawing`, `colors.draw_bold_text_with_bright_colors`.
+
+## If no fonts are listed
+
+A very small Linux install may have no monospace font at all; then Alacritty can't even open, and the Overview says so. Install one with your package manager, for example DejaVu Sans Mono (usually called `fonts-dejavu` or `dejavu-fonts`).

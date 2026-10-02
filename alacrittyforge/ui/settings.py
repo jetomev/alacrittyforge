@@ -216,9 +216,10 @@ class SettingsScreen(Horizontal):
 
     def _other(self, s: Setting, select: Select) -> None:
         if s.control == "font":
-            options = monospace_families()
-            hint = f"{len(options)} monospace fonts on this computer; type to filter"
-            custom = False
+            options = monospace_families() or []
+            hint = (f"{len(options)} monospace fonts on this computer; type to filter" if options else
+                    "No monospace fonts found on this computer; type a font's name")
+            custom = not options
         else:
             options = shells()
             hint = "Shells on this computer, or type the full path of another program"

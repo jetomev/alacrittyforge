@@ -207,6 +207,21 @@ class Screens(unittest.IsolatedAsyncioTestCase):
                 b = app.screen.query_one(bid)
                 self.assertTrue(b.region.height and b.region.bottom <= 25, f"{bid} is off the screen")
 
+    async def test_no_monospace_font_is_said_on_the_overview(self):
+        from unittest import mock
+        app = self.app()
+        with mock.patch("alacrittyforge.ui.overview.monospace_families", return_value=[]):
+            async with app.run_test(size=(120, 40)) as pilot:
+                await pilot.pause(0.5)
+                text = " ".join(str(w.render()) for w in app.query("#ov-attention Static"))
+                self.assertIn("No monospace font", text)
+        with mock.patch("alacrittyforge.ui.overview.monospace_families", return_value=None):
+            app = self.app()
+            async with app.run_test(size=(120, 40)) as pilot:
+                await pilot.pause(0.5)
+                text = " ".join(str(w.render()) for w in app.query("#ov-attention Static"))
+                self.assertNotIn("No monospace font", text)      # can't tell: say nothing
+
     async def test_every_button_label_fits_at_100_columns(self):
         from textual.widgets import Button
         app = self.app()

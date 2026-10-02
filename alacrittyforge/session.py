@@ -244,12 +244,13 @@ def _theme_names(imports: Any) -> str:
 
 # ── fonts on this computer ───────────────────────────────────────────────
 
-def monospace_families() -> list[str]:
+def monospace_families() -> list[str] | None:
+    """Monospace font families; None when they can't be listed (no fc-list)."""
     try:
         out = subprocess.run(["fc-list", ":spacing=mono", "family"], capture_output=True, text=True,
                              timeout=10).stdout
     except (OSError, subprocess.TimeoutExpired):
-        return []
+        return None
     fams = {line.split(",")[0].strip() for line in out.splitlines() if line.strip()}
     return sorted(fams, key=str.lower)
 
