@@ -222,6 +222,66 @@ class Screens(unittest.IsolatedAsyncioTestCase):
                 text = " ".join(str(w.render()) for w in app.query("#ov-attention Static"))
                 self.assertNotIn("No monospace font", text)      # can't tell: say nothing
 
+    async def test_shortcuts_record_add_and_save_in_words(self):
+        import tomllib
+        from forgekit import ReviewDialog
+        from alacrittyforge.ui.shortcuts import ShortcutDialog
+        app = self.app(SAMPLE + '\n[keyboard]\nbindings = [\n    { key = "Return", mods = "Shift", chars = "\\u001b\\r" },\n]\n')
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.press("4")
+            await pilot.pause(0.5)
+            self.assertEqual(app.session.pending, {})
+            t = app.query_one("#sc-table")
+            self.assertEqual(str(t.get_row_at(0)[1]), "Types: Esc, Enter")     # named, not printed
+            await pilot.press("plus")
+            await pilot.pause(0.5)
+            self.assertIsInstance(app.screen, ShortcutDialog)
+            await pilot.press("ctrl+t")                                        # also a screen key of ours
+            await pilot.pause(0.3)
+            self.assertEqual(app.screen.keys, {"key": "T", "mods": "Control"})
+            app.screen.query_one("#sd-ok").press()
+            await pilot.pause(0.4)
+            self.assertEqual(len(app.session.pending["keyboard.bindings"]), 2)
+            await pilot.press("f10")
+            await pilot.pause(0.5)
+            self.assertIsInstance(app.screen, ReviewDialog)
+            app.screen.query_one("#save").press()
+            await pilot.pause(0.5)
+        data = tomllib.loads(self.cfg.read_text())["keyboard"]["bindings"]
+        self.assertEqual(data[0]["chars"], "\x1b\r")                         # yours kept whole
+        self.assertEqual(data[1], {"key": "T", "mods": "Control", "action": "CreateNewWindow"})
+
+    async def test_turning_one_of_alacrittys_off_and_on(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.press("4")
+            await pilot.pause(0.5)
+            sc = app.query_one("#sec-shortcuts")
+            t = app.query_one("#sc-table")
+            t.move_cursor(row=0)                       # no shortcuts of yours: Alacritty's first
+            await pilot.pause(0.2)
+            sc.toggle_off()
+            await pilot.pause(0.2)
+            mine = app.session.pending["keyboard.bindings"]
+            self.assertEqual(mine[0]["action"], "ReceiveChar")
+            t.move_cursor(row=1)                       # the same default, now after yours
+            await pilot.pause(0.2)
+            sc.toggle_off()
+            await pilot.pause(0.2)
+            self.assertEqual(app.session.pending, {})
+
+    async def test_the_shortcut_window_fits_a_25_line_console(self):
+        app = self.app()
+        async with app.run_test(size=(100, 25)) as pilot:
+            await pilot.press("4")
+            await pilot.pause(0.5)
+            await pilot.press("plus")
+            await pilot.pause(0.5)
+            for bid in ("#sd-ok", "#sd-cancel"):
+                b = app.screen.query_one(bid)
+                self.assertTrue(b.region.height and b.region.bottom <= 25, f"{bid} is off the screen")
+            self.assertEqual(app.screen.query_one("#sd-body").scroll_y, 0)   # "1  The keys" in view
+
     async def test_every_button_label_fits_at_100_columns(self):
         from textual.widgets import Button
         app = self.app()

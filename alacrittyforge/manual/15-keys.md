@@ -22,6 +22,12 @@
 - **A**: adjust colours (makes your own copy)
 - **I**: install a theme file
 
+## Shortcuts
+
+- **+**: add a shortcut (then press its keys to record them)
+- **F2** or **Enter**: change one of yours
+- **Delete**: remove one of yours
+
 Letter keys never act while you're typing in a field.
 
 ## From the terminal

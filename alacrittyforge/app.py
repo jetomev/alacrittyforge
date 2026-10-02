@@ -33,6 +33,7 @@ from .settings_file import Unreadable
 from .settings_spec import BY_KEY, default_words
 from .ui.overview import OverviewScreen
 from .ui.settings import SettingsScreen
+from .ui.shortcuts import ShortcutsScreen
 from .ui.themes import ThemesScreen
 
 MANUAL_DIR = os.path.join(os.path.dirname(__file__), "manual")
@@ -74,6 +75,22 @@ AF_CSS = FORGE_CSS + """
 #ad-table:focus { border: solid $forge-accent; }
 #ad-preview { height: auto; margin: 1 0 0 0; }
 #ad-body { height: auto; max-height: 55vh; }
+#sec-shortcuts { padding: 0 2 0 0; }
+#sc-table { height: 1fr; max-height: 18; border: solid $forge-field-border; background: $forge-bg; }
+#sc-table:focus { border: solid $forge-accent; }
+.sc-actions { padding: 1 0 0 0; align-horizontal: left; height: auto; }
+.sc-actions Button { margin: 0 2 0 0; }
+.sc-dialog { width: 80; height: auto; max-height: 95%; }
+#sd-body { height: auto; max-height: 60vh; }
+.sc-recorder { height: 3; border: tall $forge-field-border; background: $forge-bg; content-align: left middle; width: 1fr; }
+.sc-recorder:focus { border: tall $forge-accent; }
+.sd-line { height: 3; }
+.sd-label { width: 10; height: 3; content-align: left middle; color: $forge-muted; }
+.sd-line > Select { width: 1fr; }
+#sd-mods { height: auto; border: none; background: $forge-bg; }
+#sd-clash { height: auto; margin: 0 0 1 0; }
+.sd-step { margin: 1 0 0 0; }
+#sd-preview { height: auto; }
 #af-quit-msg { height: auto; padding: 0 0 1 0; }
 """
 
@@ -194,8 +211,7 @@ class AlacrittyForgeApp(ForgeApp):
         yield OverviewScreen(self.session, id="sec-overview")
         yield SettingsScreen(self.session, id="sec-settings")
         yield ThemesScreen(self.session, id="sec-themes")
-        yield Soon("Shortcuts", "Coming in step 4: your shortcuts in words, recorded by pressing the keys.",
-                   id="sec-shortcuts")
+        yield ShortcutsScreen(self.session, id="sec-shortcuts")
         yield Soon("Backups", "Coming in step 5: why each backup was made, and what restoring it would change.",
                    id="sec-backups")
 
@@ -223,6 +239,9 @@ class AlacrittyForgeApp(ForgeApp):
         if section_id == "themes":
             self.query_one(ThemesScreen).refresh_view()
             self.query_one("#th-list").focus()
+        if section_id == "shortcuts":
+            self.query_one(ShortcutsScreen).refresh_view()
+            self.query_one("#sc-table").focus()
 
     def on_action(self, action_id: str) -> None:
         if action_id == "manual":
@@ -268,6 +287,7 @@ class AlacrittyForgeApp(ForgeApp):
             self.session.discard()
             self.query_one(SettingsScreen).sync()
             self.query_one(ThemesScreen).refresh_view()
+            self.query_one(ShortcutsScreen).refresh_view()
             self.refresh_state()
             self.notify("Changes discarded. Nothing was written.")
         elif bid == "ov-rename":
@@ -331,6 +351,7 @@ class AlacrittyForgeApp(ForgeApp):
             return
         self.query_one(SettingsScreen).sync()
         self.query_one(ThemesScreen).refresh_view()
+        self.query_one(ShortcutsScreen).refresh_view()
         self.refresh_state()
         self.query_one(OverviewScreen).refresh_view()
         self.notify("Saved. Alacritty is using it now." if s.live_reload() else

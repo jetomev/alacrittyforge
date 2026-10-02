@@ -144,7 +144,10 @@ class Session:
             gone = next((w for w, r in self.misnamed().items() if r == k), "")
             out.append(("Setting name", gone, k))
         for k in sorted(self.pending, key=lambda k: order.index(k) if k in order else len(order)):
-            if k == "general.import":
+            if k == "keyboard.bindings":
+                from .bindings import diff
+                out += diff(self.original(k) or [], [] if self.pending[k] is REMOVE else self.pending[k])
+            elif k == "general.import":
                 out.append(("Theme", _theme_names(self.original(k)), _theme_names(self.pending[k])))
             elif k == "colors":
                 out.append(("Your own colours (in the settings file)", "set",
