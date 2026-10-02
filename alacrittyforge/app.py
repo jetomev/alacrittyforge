@@ -33,6 +33,7 @@ from .settings_file import Unreadable
 from .settings_spec import BY_KEY, default_words
 from .ui.overview import OverviewScreen
 from .ui.settings import SettingsScreen
+from .ui.themes import ThemesScreen
 
 MANUAL_DIR = os.path.join(os.path.dirname(__file__), "manual")
 
@@ -56,6 +57,23 @@ AF_CSS = FORGE_CSS + """
 .af-att-body { height: auto; padding: 0 0 0 3; margin: 0 0 1 0; }
 .af-att-body:last-child { margin: 0; }
 .af-soon { padding: 1 2; }
+#sec-themes { padding: 0 2 0 0; }
+#th-left { width: 36; height: 1fr; }
+#th-list { height: 1fr; max-height: 20; border: solid $forge-field-border; background: $forge-bg; }
+#th-list:focus { border: solid $forge-accent; }
+#th-where { height: auto; padding: 1 0 0 0; }
+#th-right { width: 1fr; height: 1fr; padding: 0 0 0 2; }
+#th-title { height: auto; margin: 0 0 1 0; }
+#th-preview { height: auto; width: auto; }
+#th-swatches { height: auto; margin: 1 0 0 0; }
+#th-info { height: auto; margin: 1 0 0 0; }
+.th-actions { padding: 1 0 0 0; align-horizontal: left; height: auto; }
+.th-actions Button { margin: 0 2 0 0; }
+.af-adjust { width: 76; height: auto; max-height: 90%; }
+#ad-table { height: auto; max-height: 9; border: solid $forge-field-border; background: $forge-bg; }
+#ad-table:focus { border: solid $forge-accent; }
+#ad-preview { height: auto; margin: 1 0 0 0; }
+#ad-body { height: auto; max-height: 55vh; }
 #af-quit-msg { height: auto; padding: 0 0 1 0; }
 """
 
@@ -175,8 +193,7 @@ class AlacrittyForgeApp(ForgeApp):
     def compose_sections(self) -> ComposeResult:
         yield OverviewScreen(self.session, id="sec-overview")
         yield SettingsScreen(self.session, id="sec-settings")
-        yield Soon("Themes", "Coming in step 3: your themes with a preview, and Adjust colours.",
-                   id="sec-themes")
+        yield ThemesScreen(self.session, id="sec-themes")
         yield Soon("Shortcuts", "Coming in step 4: your shortcuts in words, recorded by pressing the keys.",
                    id="sec-shortcuts")
         yield Soon("Backups", "Coming in step 5: why each backup was made, and what restoring it would change.",
@@ -203,6 +220,9 @@ class AlacrittyForgeApp(ForgeApp):
             self.query_one(OverviewScreen).refresh_view()
         if section_id == "settings":
             self.query_one("#af-groups").focus()
+        if section_id == "themes":
+            self.query_one(ThemesScreen).refresh_view()
+            self.query_one("#th-list").focus()
 
     def on_action(self, action_id: str) -> None:
         if action_id == "manual":
@@ -247,6 +267,7 @@ class AlacrittyForgeApp(ForgeApp):
         elif bid == "af-discard":
             self.session.discard()
             self.query_one(SettingsScreen).sync()
+            self.query_one(ThemesScreen).refresh_view()
             self.refresh_state()
             self.notify("Changes discarded. Nothing was written.")
         elif bid == "ov-rename":
@@ -277,7 +298,7 @@ class AlacrittyForgeApp(ForgeApp):
                         "Restore a backup, or fix the file and press R.", title="Can't save", severity="warning",
                         timeout=10)
             return
-        if not s.pending:
+        if not s.change_count:
             self.notify("Nothing to save: no changes.")
             return
         problems = s.problems()
@@ -294,7 +315,8 @@ class AlacrittyForgeApp(ForgeApp):
         else:
             steps.append("They show the next time Alacritty opens")
         choice = await self.push_screen_wait(ReviewDialog(
-            "Review before saving", [ChangeGroup("Settings", path, s.changes())], steps=steps,
+            "Review before saving", [ChangeGroup("Settings", path, s.changes())], steps=(
+                ["New themes are written to the themes folder"] if s.new_files else []) + steps,
             buttons=[("Save", "save", True)]))
         if choice is None:
             return
@@ -308,6 +330,7 @@ class AlacrittyForgeApp(ForgeApp):
             self.notify(f"{e.strerror or e}. Nothing was changed.", title="Not saved", severity="error", timeout=10)
             return
         self.query_one(SettingsScreen).sync()
+        self.query_one(ThemesScreen).refresh_view()
         self.refresh_state()
         self.query_one(OverviewScreen).refresh_view()
         self.notify("Saved. Alacritty is using it now." if s.live_reload() else
@@ -342,7 +365,7 @@ class AlacrittyForgeApp(ForgeApp):
     # ── quitting ─────────────────────────────────────────────────────────────
     def before_quit(self) -> bool:
         s = self.session
-        if s.pending:
+        if s.change_count:
             n = s.change_count
             self.push_screen(QuitDialog(
                 f"{n} change{'s are' if n != 1 else ' is'} not saved",

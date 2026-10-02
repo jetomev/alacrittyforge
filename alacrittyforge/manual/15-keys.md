@@ -16,6 +16,12 @@
 - **?**: the list of keys
 - **Q** or **Ctrl+Q**: quit (asks first if something isn't saved)
 
+## Themes
+
+- **Enter**: use the theme you picked
+- **A**: adjust colours (makes your own copy)
+- **I**: install a theme file
+
 Letter keys never act while you're typing in a field.
 
 ## From the terminal

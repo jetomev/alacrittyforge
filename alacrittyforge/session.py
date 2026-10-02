@@ -51,15 +51,19 @@ def _leaves(d: dict, prefix: str = "") -> list[str]:
 class Session:
     path: Path = CONFIG_PATH
     backup_dir: Path | None = None
+    themes_dir: Path | None = None        # None: ~/.config/alacritty/themes
     file: SettingsFile = field(default=None)
     pending: dict[str, Any] = field(default_factory=dict)
+    new_files: dict[Path, str] = field(default_factory=dict)  # theme files a save will write
     saved_at: dt.datetime | None = None
     saves: list[str] = field(default_factory=list)      # for the closing note
     last_backup: Path | None = None
 
     @classmethod
-    def load(cls, path: Path = CONFIG_PATH, backup_dir: Path | None = None) -> "Session":
-        s = cls(path=Path(path), backup_dir=backup_dir)
+    def load(cls, path: Path = CONFIG_PATH, backup_dir: Path | None = None,
+             themes_dir: Path | None = None) -> "Session":
+        from .themes import THEMES_DIR
+        s = cls(path=Path(path), backup_dir=backup_dir, themes_dir=themes_dir or THEMES_DIR)
         s.file = SettingsFile.load(s.path)
         return s
 
@@ -108,10 +112,15 @@ class Session:
 
     def discard(self) -> None:
         self.pending.clear()
+        self.new_files.clear()
+
+    def add_file(self, path: Path, text: str) -> None:
+        """Stage a new file (a theme); the save writes it, never over another."""
+        self.new_files[Path(path)] = text
 
     @property
     def change_count(self) -> int:
-        return len(self.pending)
+        return len(self.pending) + len(self.new_files)
 
     def problems(self) -> list[str]:
         out = []
@@ -124,9 +133,14 @@ class Session:
     def changes(self) -> list[tuple[str, str, str]]:
         """(label, old, new) for the review, in the order settings are shown."""
         order = list(BY_KEY)
-        out = []
+        out = [("New theme", "", p.stem) for p in self.new_files]
         for k in sorted(self.pending, key=lambda k: order.index(k) if k in order else len(order)):
-            if k in BY_KEY:
+            if k == "general.import":
+                out.append(("Theme", _theme_names(self.original(k)), _theme_names(self.pending[k])))
+            elif k == "colors":
+                out.append(("Your own colours (in the settings file)", "set",
+                            "taken out; they would hide the theme"))
+            elif k in BY_KEY:
                 out.append((BY_KEY[k].label, self.shown(k, self.original(k)), self.shown(k, self.pending[k])))
             else:
                 out.append((k, str(self.original(k)), "removed" if self.pending[k] is REMOVE
@@ -146,12 +160,21 @@ class Session:
         return out
 
     # ── saving ───────────────────────────────────────────────────────────
-    def save(self, note: str = "Before a save") -> SaveResult:
+    def save(self, note: str = "Before a save") -> SaveResult | None:
         n = self.change_count
-        r = save(self.file_changes(), path=self.path, note=note, backup_dir=self.backup_dir)
+        from .settings_file import write_atomic
+        for path in self.new_files:
+            if path.exists():
+                raise FileExistsError(f"{path.name} already exists; nothing was written")
+        for path, text in self.new_files.items():
+            write_atomic(path, text)
+        self.new_files.clear()
+        r = None
+        if self.pending:
+            r = save(self.file_changes(), path=self.path, note=note, backup_dir=self.backup_dir)
+            self.last_backup = r.backup
         self.pending.clear()
         self.saved_at = dt.datetime.now()
-        self.last_backup = r.backup
         self.saves.append(f"Saved {n} change{'s' if n != 1 else ''} at {self.saved_at:%I:%M %p}.")
         self.reload()
         return r
@@ -180,6 +203,14 @@ class Session:
     def live_reload(self) -> bool:
         v = self.original("general.live_config_reload")
         return True if v is None else bool(v)
+
+
+def _theme_names(imports: Any) -> str:
+    """The theme in an import list, by name."""
+    for p in imports or []:
+        if "/themes/" in str(p):
+            return Path(str(p)).stem
+    return "none"
 
 
 # ── fonts on this computer ───────────────────────────────────────────────
