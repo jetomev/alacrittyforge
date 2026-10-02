@@ -7,6 +7,6 @@
 ## Next — the grubForge 2.0 look (Javier, 2026-10-02)
 Same method as grubForge 2.0, which worked:
 - [x] Project kit: `CLAUDE.md` + this TODO (2 Oct); GitHub About/topics checked; Vault folder exists
-- [ ] Research: inventory of every screen and setting today, and what forgekit 0.5.0 already gives (SettingRow, Toggle/Choices/CheckList/NumberPresets, FilterPicker, ChangesBar, HintBar, Notice, Review/Progress, Manual, closing note)
-- [ ] Design: screen-by-screen plan as a page Javier approves **before any code**; known values picked, not typed; Save with a review first; a manual inside the app; readable on a text console and at 100 columns
+- [x] Research (2 Oct): inventory of 0.2.0 (found 4 save-safety bugs: blank font value breaks the save; whole-file rewrite drops comments, unparseable file → near-empty save; one backup per shortcut change; brackets vanish in the theme preview) + every Alacritty 0.17 setting and value
+- [ ] Design drawn (2 Oct): https://claude.ai/artifact/EaYPYBBpM93B97KgMcrSVL · copy `docs/design/v1.0.0-screens.html`. **Waiting on Javier's answers to 8 questions** (version 1.0.0?, 5 screens with Fonts in Settings, every setting, keep comments via python-tomlkit, Adjust colours, record shortcut keys, hypeForge themes read-only, update old names)
 - [ ] Build on the 0.5.0 pieces; tests per screen (incl. the 100-column checks); Javier's own run; release (GitHub + AUR)

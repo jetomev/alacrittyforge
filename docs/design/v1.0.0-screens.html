@@ -1,0 +1,449 @@
+<title>alacrittyForge Screen Designs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: one reading column; each screen = a short brief, a 100-column terminal drawing, then what it decides. Same family as the grubForge 2.0 design page. */
+:root {
+  --bg: #f6f5fa;
+  --fg: #23212e;
+  --muted: #5d5a70;
+  --rule: #dcd9e8;
+  --panel: #ffffff;
+  --accent: #6c4fc7;
+  --accent-soft: #ece6fb;
+  --warn-soft: #fbf1d9;
+  --warn-ink: #7a5300;
+  --bad-soft: #fbe3e6;
+  --bad-ink: #8a1d33;
+  --ok-ink: #1f6b3a;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "DejaVu Sans Mono", ui-monospace, monospace;
+  /* Terminal drawings use the app's own palette (Catppuccin Mocha) in both page themes. */
+  --t-base: #1e1e2e; --t-mantle: #181825; --t-crust: #11111b;
+  --t-s0: #313244; --t-s1: #45475a; --t-s2: #585b70; --t-ov: #7f849c;
+  --t-sub: #a6adc8; --t-text: #cdd6f4; --t-blue: #89b4fa; --t-mauve: #cba6f7;
+  --t-green: #a6e3a1; --t-yellow: #f9e2af; --t-red: #f38ba8; --t-peach: #fab387; --t-box: #2b4a7a;
+  /* Javier's KognogOS-theme, for the theme preview */
+  --k-bg: #1a1a1a; --k-fg: #cdd6f4; --k-cur: #f5e0dc; --k-pink: #f5c2e7; --k-teal: #94e2d5;
+  --k-white: #bac2de; --k-bblack: #585b70; --k-bwhite: #a6adc8;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15141c; --fg: #e6e3f2; --muted: #a29fb8; --rule: #2e2c3d; --panel: #1d1b27;
+    --accent: #b9a3ff; --accent-soft: #2a2442; --warn-soft: #3a3020; --warn-ink: #f3d49a;
+    --bad-soft: #3a1e26; --bad-ink: #f6b3c2; --ok-ink: #9fe0b2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15141c; --fg: #e6e3f2; --muted: #a29fb8; --rule: #2e2c3d; --panel: #1d1b27;
+  --accent: #b9a3ff; --accent-soft: #2a2442; --warn-soft: #3a3020; --warn-ink: #f3d49a;
+  --bad-soft: #3a1e26; --bad-ink: #f6b3c2; --ok-ink: #9fe0b2;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.55; padding: 0 16px; }
+.wrap { max-width: 1060px; margin: 0 auto; padding-block: 40px 80px; display: grid; gap: 56px; }
+.wrap > * { min-width: 0; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); letter-spacing: -0.01em; }
+h2 { font-size: 27px; }
+h3 { font-size: 19px; }
+p { margin: 0; }
+.stack { display: grid; gap: 14px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.lede { font-size: 19px; color: var(--muted); }
+code, kbd { font-family: var(--font-mono); font-size: 0.86em; }
+kbd { border: 1px solid var(--rule); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--panel); white-space: nowrap; }
+a { color: var(--accent); }
+ul, ol { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+section { display: grid; gap: 20px; min-width: 0; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 15px; }
+.toc a { text-decoration: none; border-bottom: 1px solid var(--rule); }
+/* Terminal drawing */
+.term { background: var(--t-base); color: var(--t-text); border-radius: 8px; overflow-x: auto; border: 1px solid #2c2c3e; }
+.term pre { margin: 0; padding: 14px 16px; font-family: var(--font-mono); font-size: 12.6px; line-height: 1.42; white-space: pre; }
+.cap { font-size: 14.5px; color: var(--muted); }
+.m { color: var(--t-sub); } .d { color: var(--t-ov); } .a { color: var(--t-blue); } .v { color: var(--t-mauve); }
+.ok { color: var(--t-green); } .w { color: var(--t-yellow); } .er { color: var(--t-red); } .pc { color: var(--t-peach); }
+.b { font-weight: 700; } .u { text-decoration: underline; }
+.hdr { background: var(--t-crust); } .bar { background: var(--t-mantle); }
+.sel { background: var(--t-box); color: var(--t-text); } .fld { background: var(--t-s0); } .btn { background: var(--t-s1); color: var(--t-text); }
+.pri { background: var(--t-box); color: var(--t-text); font-weight: 700; } .act { background: var(--t-box); font-weight: 700; }
+.foc { background: var(--t-s0); outline: 1px solid var(--t-blue); }
+/* the theme preview, drawn in Javier's KognogOS-theme */
+.kt, .kg, .kbl, .kr, .ky, .kcur { background: var(--k-bg); }
+.kt { color: var(--k-fg); } .kg { color: var(--t-green); } .kbl { color: var(--t-blue); font-weight: 700; }
+.kr { color: var(--t-red); } .ky { color: var(--t-yellow); } .kcur { background: var(--k-cur); }
+.c0 { color: var(--k-bg); } .c1 { color: var(--t-red); } .c2 { color: var(--t-green); } .c3 { color: var(--t-yellow); }
+.c4 { color: var(--t-blue); } .c5 { color: var(--k-pink); } .c6 { color: var(--k-teal); } .c7 { color: var(--k-white); }
+.c8 { color: var(--k-bblack); } .c15 { color: var(--k-bwhite); }
+.k1a { color: var(--k-bg); text-shadow: 0 0 1px #777; } .kcd { color: var(--k-fg); } .kcu { color: var(--k-cur); }
+/* Console drawing: the 8-colour Linux console */
+.con { background: #000; border-color: #333; }
+.con pre { color: #c0c0c0; }
+.c-bl { background: #0000aa; color: #fff; } .c-cy { color: #55ffff; } .c-y { color: #ffff55; } .c-g { color: #55ff55; } .c-pri { background: #00aaaa; color: #000; }
+/* Tables */
+.tw { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15.5px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 700; }
+tr.grp th { color: var(--accent); padding-top: 18px; }
+td code { white-space: nowrap; }
+/* Decisions and notes */
+.decide { background: var(--accent-soft); border-radius: 10px; padding: 18px 20px; display: grid; gap: 10px; }
+.decide h3 { color: var(--accent); }
+.decide ol { gap: 12px; }
+.rec { font-weight: 700; }
+.note { background: var(--warn-soft); color: var(--warn-ink); border-radius: 8px; padding: 12px 16px; font-size: 15.5px; }
+.bad { background: var(--bad-soft); color: var(--bad-ink); border-radius: 10px; padding: 16px 20px; display: grid; gap: 10px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.two > * { min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+
+<header class="stack">
+  <div class="eyebrow">alacrittyForge · design proposal · 2 October 2026</div>
+  <h1>alacrittyForge, screen by screen</h1>
+  <p class="lede prose">Every screen of the new alacrittyForge, drawn before any code is written: what you see, the order you move through it, what you pick instead of type, and how a save works. Your answers to the questions below decide what gets built.</p>
+  <p class="prose">Your brief: <em>"rework alacrittyForge and bitlaForge to match the look of grubForge, so far the best of the 3."</em> So this page follows grubForge 2.0 on purpose: the same frame, the same five-screen shape, the same Save with a review first. Every drawing is exactly <b>100 columns</b> wide, the size of a small text console, so what you see here fits there.</p>
+  <nav class="toc" aria-label="Contents">
+    <a href="#decisions">Questions for you</a><a href="#repair">What today's version gets wrong</a><a href="#overview">Overview</a><a href="#settings">Settings</a><a href="#themes">Themes</a><a href="#shortcuts">Shortcuts</a><a href="#backups">Backups</a><a href="#save">Saving</a><a href="#help">Help &amp; manual</a><a href="#keys">Keys</a><a href="#console">Text console</a><a href="#plan">How it gets built</a>
+  </nav>
+</header>
+
+<section id="decisions">
+  <div class="decide">
+    <h3>Questions for you · my recommendation first</h3>
+    <ol>
+      <li><b>Version number.</b> <span class="rec">1.0.0</span>: safe saving plus a full redesign makes this the first version I would call finished. The alternative is 0.3.0.</li>
+      <li><b>Five screens, like grubForge:</b> Overview, Settings, Themes, Shortcuts, Backups. <span class="rec">Fonts become the "Text" group inside Settings</span> instead of a screen of their own, and Backups becomes a screen (the code to restore one exists today, but nothing shows it).</li>
+      <li><b>Which settings to show.</b> <span class="rec">Every setting Alacritty 0.17 has on Linux</span>, in plain words, each showing "Not set (Alacritty uses …)" until you set it; rare ones in an Advanced group; macOS-only ones hidden. Today only settings already written in your file appear, and you can't add one.</li>
+      <li><b>Keep your comments and layout when saving.</b> <span class="rec">Yes.</span> Today a save rewrites the whole file and drops anything you wrote by hand. Keeping it needs <code>python-tomlkit</code>, which is in Arch's official repositories (and already on this computer).</li>
+      <li><b>Colours.</b> <span class="rec">Themes gets "Adjust colours"</span>: change single colours by picking from swatches or typing a code, saved as your own copy of the theme. Or keep themes whole, as today.</li>
+      <li><b>Shortcuts: press the keys to record them</b>, with lists to pick from as a fallback. <span class="rec">Yes.</span> Today the key is typed by name.</li>
+      <li><b>hypeForge's theme files</b> (<code>hypeforge-*.toml</code> say "Do not edit; it is rewritten"). <span class="rec">Shown and usable, never edited</span>; "Adjust colours" on one saves a copy. The same rule as grubForge's entries from other tools.</li>
+      <li><b>Old setting names</b> (Alacritty renamed several, and warns every start). <span class="rec">One "Update it" button</span> on the Overview, listed in the review like any change.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="repair">
+  <h2>What today's version gets wrong</h2>
+  <p class="prose">I took stock of alacrittyForge 0.2.0 before drawing anything, and checked the serious findings on this computer. The redesign is a repair job as much as a new look.</p>
+  <div class="bad">
+    <b>Saving can lose or damage your settings</b>
+    <ul>
+      <li><b>Clearing a font setting breaks the save.</b> The "blank, inherit" choice writes an empty value the file format cannot hold; the save fails with "Failed to write config file".</li>
+      <li><b>A save rewrites the whole file</b>, directly, dropping comments and your layout. If the file couldn't be read, a save would replace it with only the changed settings; the backup is the only thing that saves you.</li>
+      <li><b>Shortcut changes make one backup each.</b> Only 20 are kept, so one big save can push out all your older backups. Edited shortcuts also lose any extra parts (mode, command).</li>
+      <li><b>Text in square brackets disappears</b> from the theme preview, so lines like <code>[colors.primary]</code> don't show.</li>
+    </ul>
+  </div>
+  <div class="two">
+    <div class="card"><b>Still typed by hand</b><p>Shortcut keys and their text, every number, every colour code, theme names, and any setting not in alacrittyForge's own list.</p></div>
+    <div class="card"><b>Shown in program terms</b><p>Settings appear by their file names (<code>window.decorations</code>); one shortcut shows as raw data; a hidden control character in your Shift+Enter shortcut breaks the Shortcuts screen's picture.</p></div>
+    <div class="card"><b>Out of date</b><p>No <code>--version</code> or <code>--help</code>; the man page describes 0.1.1; the Shortcuts window lists keys that changed; the title bar says "AlacrittyForge", the old name.</p></div>
+  </div>
+</section>
+
+<section id="overview">
+  <h2>1 · Overview</h2>
+  <p class="prose">The first screen answers "is my terminal set up right?" in four boxes, like grubForge. Anything that needs attention comes with the button that fixes it.</p>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar"> <span class="act"> Overview </span>   S<span class="u">e</span>ttings    <span class="u">T</span>hemes    Shortc<span class="u">u</span>ts    Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+  <span class="a">╭─ Your terminal ─────────────────────────────╮</span>  <span class="w">╭─ Needs attention ───────────────────────────╮</span>  
+  <span class="a">│</span> <span class="m">Theme     </span> <span class="b">KognogOS-theme</span>                   <span class="a">│</span>  <span class="w">│</span> <span class="w b">!</span> <span class="b">1 setting uses an old name.</span>               <span class="w">│</span>  
+  <span class="a">│</span> <span class="m">Font      </span> JetBrainsMono Nerd Font · 12     <span class="a">│</span>  <span class="w">│</span>   <span class="m">shell</span> is now <span class="m">terminal.shell</span>; Alacritty    <span class="w">│</span>  
+  <span class="a">│</span> <span class="m">Window    </span> 95% opaque · blurred · 150×50    <span class="a">│</span>  <span class="w">│</span>   still reads it but warns every start.     <span class="w">│</span>  
+  <span class="a">│</span> <span class="m">Shell     </span> fish                             <span class="a">│</span>  <span class="w">│</span>                         <span class="foc"> Update it </span>         <span class="w">│</span>  
+  <span class="a">│</span> <span class="m">Shortcuts </span> 5 of yours · 44 from Alacritty   <span class="a">│</span>  <span class="w">│</span> <span class="d">  (an example: your file has none)</span>          <span class="w">│</span>  
+  <span class="a">╰─────────────────────────────────────────────╯</span>  <span class="w">╰─────────────────────────────────────────────╯</span>  
+                                                                                                    
+  <span class="a">╭─ Safety ────────────────────────────────────╮</span>  <span class="a">╭─ Common tasks ──────────────────────────────╮</span>  
+  <span class="a">│</span> <span class="m">Backups  </span> 3 · newest Aug 9 20:35            <span class="a">│</span>  <span class="a">│</span> <span class="d">One step to the things people change most.</span>  <span class="a">│</span>  
+  <span class="a">│</span> <span class="m">Saving   </span> one backup first; your            <span class="a">│</span>  <span class="a">│</span>                                             <span class="a">│</span>  
+  <span class="a">│</span> <span class="m">         </span> comments and layout are kept      <span class="a">│</span>  <span class="a">│</span> <span class="btn"> Pick a theme       </span>  <span class="btn"> Change the font    </span>  <span class="a">│</span>  
+  <span class="a">│</span> <span class="m">File     </span> ~/.config/alacritty/alacritty.toml<span class="a">│</span>  <span class="a">│</span>                                             <span class="a">│</span>  
+  <span class="a">╰─────────────────────────────────────────────╯</span>  <span class="a">│</span> <span class="btn"> Text size          </span>  <span class="btn"> Back up now        </span>  <span class="a">│</span>  
+                                                   <span class="a">╰─────────────────────────────────────────────╯</span>  
+                                                                                                    
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">Tab</span> <span class="d">next button</span>  ·  <span class="a">Enter</span> <span class="d">do it</span>  ·  <span class="a">1-5</span> <span class="d">screens</span>  ·  <span class="a">F1</span> <span class="d">help</span>  ·  <span class="a">?</span> <span class="d">all keys</span>                         </span></pre></div>
+  <p class="cap">"Needs attention" checks: the file can't be read (offers the newest backup), settings with old names (one button updates them), settings Alacritty doesn't know (it ignores them; shown so they can be removed), the file changed outside alacrittyForge (picked up), and live reload switched off (then changes need Alacritty restarted). When nothing needs attention it says so in green. Your file has none of these today; the one shown is an example.</p>
+</section>
+
+<section id="settings">
+  <h2>2 · Settings</h2>
+  <p class="prose">A form, grouped by what you want to change, exactly like grubForge's. Groups on the left, their settings on the right. Every value that comes from a known list is picked; numbers have presets one key away; switches say what they do. The help line at the bottom gives Alacritty's own name for the setting under the cursor.</p>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview   <span class="act"> Settings </span>   <span class="u">T</span>hemes    Shortc<span class="u">u</span>ts    Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+ <span class="sel"> Window            </span> <span class="d">│</span> <span class="v b">Window</span>   <span class="d">how the terminal window looks</span>                                       
+  Text                <span class="d">│</span>                                                                             
+  Cursor              <span class="d">│</span> Opacity            <span class="fld"> 90 </span><span class="d"> %</span>  <span class="btn"> 70 </span> <span class="btn"> 80 </span> <span class="pri"> 90 </span> <span class="btn"> 95 </span> <span class="btn">100</span>                          
+  Scrolling &amp; copy    <span class="d">│</span>                    <span class="pc">● changed</span> <span class="d">· was: 95%</span>                                     
+  Bell                <span class="d">│</span>                                                                             
+  Shell &amp; start       <span class="d">│</span> Blur behind        <span class="fld"> ● On  </span>  <span class="d">KDE on Wayland only</span>                             
+  Mouse &amp; links       <span class="d">│</span>                                                                             
+  Advanced            <span class="d">│</span> Title bar          <span class="fld"> (•) Full   ( ) None </span>                                    
+                      <span class="d">│</span>                                                                             
+                      <span class="d">│</span> Opens as           <span class="fld"> (•) Window  ( ) Maximized  ( ) Full screen </span>             
+                      <span class="d">│</span>                    <span class="d">next time Alacritty opens</span>                                
+                      <span class="d">│</span>                                                                             
+                      <span class="d">│</span> Size when opened   <span class="fld"> 150 </span> <span class="d">columns ×</span> <span class="fld"> 50 </span> <span class="d">lines</span>                               
+                      <span class="d">│</span>                                                                             
+                      <span class="d">│</span> Padding            <span class="fld"> 15 </span><span class="d"> cells</span>  <span class="btn"> 0 </span> <span class="btn"> 5 </span> <span class="btn"> 10 </span> <span class="pri"> 15 </span> <span class="btn"> 20 </span>                       
+                      <span class="d">│</span>                    <span class="d">space between the text and the window edge</span>               
+                                                                                                    
+<span class="d">  Window: opacity, blur, title bar, start-up size. Alacritty name: </span> <span class="m">window.opacity</span>                  
+<span class="bar"> <span class="pc">●</span> <span class="pc">1 change not saved yet</span>                                                    <span class="pri"> Save…  F10 </span> <span class="btn"> Discard </span> </span>
+<span class="hdr"> <span class="a">↑↓</span> <span class="d">groups</span>  ·  <span class="a">Tab</span> <span class="d">settings</span>  ·  <span class="a">←→</span> <span class="d">presets</span>  ·  <span class="a">F10</span> <span class="d">save</span>  ·  <span class="a">F1</span> <span class="d">help</span>  ·  <span class="a">?</span> <span class="d">all keys</span>                  </span></pre></div>
+  <p class="cap">Opacity was changed from 95% to 90% here: the row says so, and the bar at the bottom counts it. Nothing is written until you save.</p>
+  <h3>The Text group (today's Fonts screen)</h3>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview   <span class="act"> Settings </span>   <span class="u">T</span>hemes    Shortc<span class="u">u</span>ts    Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+  Window              <span class="d">│</span> <span class="v b">Text</span>   <span class="d">the font and its size</span>                                                
+ <span class="sel"> Text              </span> <span class="d">│</span>                                                                              
+  Cursor              <span class="d">│</span> Font               <span class="fld"> JetBrainsMono Nerd Font             ▼ </span>                  
+  Scrolling &amp; copy    <span class="d">│</span>                    <span class="d">486 monospace fonts on this computer; type to filter</span>     
+  Bell                <span class="d">│</span>                                                                             
+  Shell &amp; start       <span class="d">│</span> Size               <span class="fld"> 12 </span><span class="d"> pt</span>  <span class="btn"> 10 </span> <span class="btn"> 11 </span> <span class="pri"> 12 </span> <span class="btn"> 13 </span> <span class="btn"> 14 </span> <span class="btn"> 16 </span>                   
+  Mouse &amp; links       <span class="d">│</span>                                                                             
+  Advanced            <span class="d">│</span> Bold, italic       <span class="fld"> ● Same font  </span>  <span class="d">uses Bold / Italic / Bold Italic</span>         
+                      <span class="d">│</span>                                                                             
+                      <span class="d">│</span> Line spacing       <span class="fld"> 0 </span>  <span class="btn"> -1 </span> <span class="pri"> 0 </span> <span class="btn"> +1 </span> <span class="btn"> +2 </span> <span class="btn"> +4 </span>                             
+                      <span class="d">│</span>                                                                             
+                      <span class="d">│</span> Line drawing       <span class="fld"> ● Built in </span>  <span class="d">crisp boxes and lines, whatever the font</span>   
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">↑↓</span> <span class="d">groups</span>  ·  <span class="a">Tab</span> <span class="d">settings</span>  ·  <span class="a">Enter</span> <span class="d">open list</span>  ·  <span class="a">F10</span> <span class="d">save</span>  ·  <span class="a">?</span> <span class="d">all keys</span>                         </span></pre></div>
+  <p class="cap">A terminal can't draw a font other than its own, so the font list shows names, not samples. Bold and italic use the same font unless you switch "Same font" off; then each gets its own font and style.</p>
+  <h3>Every setting, and how it's set</h3>
+  <div class="tw"><table><thead><tr><th>Setting, in plain words</th><th>Alacritty name (help line)</th><th>How it is set</th></tr></thead><tbody><tr class="grp"><th colspan="3">Window</th></tr><tr><td>Opacity</td><td><code>window.opacity</code></td><td>number + presets 70–100 %</td></tr><tr><td>Blur behind</td><td><code>window.blur</code></td><td>switch (KDE on Wayland only)</td></tr><tr><td>Title bar</td><td><code>window.decorations</code></td><td>choice: Full · None</td></tr><tr><td>Opens as</td><td><code>window.startup_mode</code></td><td>choice: Window · Maximized · Full screen</td></tr><tr><td>Size when opened</td><td><code>window.dimensions</code></td><td>two numbers</td></tr><tr><td>Padding / Even padding</td><td><code>window.padding · dynamic_padding</code></td><td>presets 0–20 · switch</td></tr><tr><td>Window title / Title follows the program</td><td><code>window.title · dynamic_title</code></td><td>text · switch</td></tr><tr><td>Window name for the desktop</td><td><code>window.class</code></td><td>text (Advanced)</td></tr><tr class="grp"><th colspan="3">Text</th></tr><tr><td>Font</td><td><code>font.normal.family (and bold/italic)</code></td><td>list of this computer&#x27;s monospace fonts, filtered by typing</td></tr><tr><td>Size</td><td><code>font.size</code></td><td>presets 10–16</td></tr><tr><td>Bold, italic</td><td><code>font.bold/italic/bold_italic</code></td><td>switch “same font”, or a font and a style each</td></tr><tr><td>Line spacing · Letter spacing</td><td><code>font.offset.y · .x</code></td><td>presets −1 … +4</td></tr><tr><td>Line drawing</td><td><code>font.builtin_box_drawing</code></td><td>switch</td></tr><tr><td>Bold text in bright colours</td><td><code>colors.draw_bold_text_with_bright_colors</code></td><td>switch</td></tr><tr class="grp"><th colspan="3">Cursor</th></tr><tr><td>Shape</td><td><code>cursor.style.shape</code></td><td>choice: Block · Underline · Beam</td></tr><tr><td>Blinking</td><td><code>cursor.style.blinking</code></td><td>choice: Never · Off · On · Always</td></tr><tr><td>Blink speed · Stop blinking after</td><td><code>cursor.blink_interval · blink_timeout</code></td><td>presets</td></tr><tr><td>Hollow when unfocused · Thickness</td><td><code>cursor.unfocused_hollow · thickness</code></td><td>switch · presets</td></tr><tr><td>Cursor in vi mode</td><td><code>cursor.vi_mode_style</code></td><td>choice: same as normal, or a shape</td></tr><tr class="grp"><th colspan="3">Scrolling &amp; copy</th></tr><tr><td>Lines kept to scroll back</td><td><code>scrolling.history</code></td><td>presets 1 000 · 10 000 · 50 000 · 100 000</td></tr><tr><td>Scroll speed</td><td><code>scrolling.multiplier</code></td><td>presets 1–5</td></tr><tr><td>Copy when you select</td><td><code>selection.save_to_clipboard</code></td><td>switch</td></tr><tr><td>Word separators</td><td><code>selection.semantic_escape_chars</code></td><td>text (Advanced)</td></tr><tr><td>Programs may use the clipboard</td><td><code>terminal.osc52</code></td><td>choice: No · Copy only · Paste only · Both</td></tr><tr class="grp"><th colspan="3">Bell</th></tr><tr><td>Flash · Flash colour · How it fades</td><td><code>bell.duration · color · animation</code></td><td>presets · colour picker · list of 10</td></tr><tr><td>Run a program</td><td><code>bell.command</code></td><td>text (Advanced)</td></tr><tr class="grp"><th colspan="3">Shell &amp; start</th></tr><tr><td>Shell</td><td><code>terminal.shell.program</code></td><td>list from /etc/shells (fish, bash, zsh…)</td></tr><tr><td>Start in folder</td><td><code>general.working_directory</code></td><td>folder picker</td></tr><tr><td>Terminal type</td><td><code>env.TERM</code></td><td>list: alacritty · xterm-256color · …</td></tr><tr><td>Other variables</td><td><code>env.*</code></td><td>name = value list</td></tr><tr><td>Pick up changes without restarting</td><td><code>general.live_config_reload</code></td><td>switch</td></tr><tr class="grp"><th colspan="3">Mouse &amp; links</th></tr><tr><td>Hide the mouse while typing</td><td><code>mouse.hide_when_typing</code></td><td>switch</td></tr><tr><td>Open links with</td><td><code>hints.enabled[url].command</code></td><td>list: xdg-open, a browser…</td></tr><tr class="grp"><th colspan="3">Advanced</th></tr><tr><td>Everything rare: IPC socket, window level, resize steps, debug options</td><td><code>general.ipc_socket · debug.* · …</code></td><td>each with its control; macOS-only settings hidden</td></tr></tbody></table></div>
+</section>
+
+<section id="themes">
+  <h2>3 · Themes</h2>
+  <p class="prose">Your themes on the left; on the right, a preview of a terminal in the selected theme's colours, the way grubForge previews your real boot menu. "Use this theme" is a change like any other, saved with F10.</p>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview    S<span class="u">e</span>ttings   <span class="act"> Themes </span>   Shortc<span class="u">u</span>ts    Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+  <span class="b">Your themes</span>                             <span class="v b">KognogOS-theme</span>  <span class="d">· a preview in its colours</span>                
+  <span class="sel"> ● KognogOS-theme        in use </span>        <span class="kt"> </span><span class="kg">javier@tphome-linux</span><span class="kt"> </span><span class="kbl">~/Programs</span><span class="kt">&gt; ls</span><span class="kt">           </span>            
+     hypeforge-mocha   <span class="d">hypeForge</span>          <span class="kt"> </span><span class="kbl">alacrittyforge/</span><span class="kt">  </span><span class="kbl">grubforge/</span><span class="kt">  </span><span class="kg">run.sh</span><span class="kt">          </span>            
+     hypeforge-black   <span class="d">hypeForge</span>          <span class="kt"> &gt; git status</span><span class="kt">                                 </span>            
+     hypeforge-gray    <span class="d">hypeForge</span>          <span class="kr">   modified:   README.md</span><span class="kt">                      </span>            
+     hypeforge-green   <span class="d">hypeForge</span>          <span class="kg">   new file:   docs/plan.md</span><span class="kt">                   </span>            
+     hypeforge-white   <span class="d">hypeForge</span>          <span class="ky">   warning: 2 files not staged</span><span class="kt">                </span>            
+     hypeforge-current <span class="d">hypeForge</span>          <span class="kt"> &gt; </span><span class="kcur"> </span><span class="kt">                                          </span>            
+                                                                                                    
+  <span class="d">7 themes · ~/.config/alacritty/themes</span>   <span class="d">Normal </span> <span class="c0">██</span><span class="c1">██</span><span class="c2">██</span><span class="c3">██</span><span class="c4">██</span><span class="c5">██</span><span class="c6">██</span><span class="c7">██</span>                                  
+                                          <span class="d">Bright </span> <span class="c8">██</span><span class="c1">██</span><span class="c2">██</span><span class="c3">██</span><span class="c4">██</span><span class="c5">██</span><span class="c6">██</span><span class="c15">██</span>                                  
+                                                                                                    
+  <span class="pri"> Use this theme </span>  <span class="btn"> Adjust colours… </span>  <span class="btn"> Save my colours as a theme… </span>  <span class="btn"> Where to get themes </span>         
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">↑↓</span> <span class="d">pick</span>  ·  <span class="a">Enter</span> <span class="d">use this theme</span>  ·  <span class="a">A</span> <span class="d">adjust colours</span>  ·  <span class="a">Tab</span> <span class="d">buttons</span>  ·  <span class="a">F10</span> <span class="d">save</span>  ·  <span class="a">?</span> <span class="d">all keys</span>  </span></pre></div>
+  <p class="cap">hypeForge's themes are marked as hypeForge's: usable, never edited. Colours written straight into your settings file (the second way Alacritty can be themed) show as "My colours" in the list. "Where to get themes" points to Alacritty's own theme collection; installing one copies the file into your themes folder after checking it is a theme.</p>
+  <h3>Adjust colours (question 5)</h3>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview    S<span class="u">e</span>ttings   <span class="act"> Themes </span>   Shortc<span class="u">u</span>ts    Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+          <span class="a">╭─ Adjust colours · KognogOS-theme ────────────────────────────────────────╮</span>              
+          <span class="a">│</span>                                                                          <span class="a">│</span>              
+          <span class="a">│</span> <span class="d">Saved as a copy: </span><span class="b">KognogOS-theme (mine)</span><span class="d"> · the original stays as it is</span>     <span class="a">│</span>              
+          <span class="a">│</span>                                                                          <span class="a">│</span>              
+          <span class="a">│</span> Background  <span class="k1a">██</span> <span class="fld"> #1a1a1a </span>      Text        <span class="kcd">██</span> <span class="fld"> #cdd6f4 </span>                   <span class="a">│</span>              
+          <span class="a">│</span> Cursor      <span class="kcu">██</span> <span class="fld"> #f5e0dc </span>      Selection   <span class="kcd">██</span> <span class="fld"> #cdd6f4 </span>                   <span class="a">│</span>              
+          <span class="a">│</span>                                                                          <span class="a">│</span>              
+          <span class="a">│</span> <span class="d">Normal </span> <span class="c0">██</span><span class="c1">██</span><span class="c2">██</span><span class="c3">██</span><span class="c4">██</span><span class="c5">██</span><span class="c6">██</span><span class="c7">██</span>      <span class="d">Bright </span> <span class="c8">██</span><span class="c1">██</span><span class="c2">██</span><span class="c3">██</span><span class="c4">██</span><span class="c5">██</span><span class="c6">██</span><span class="c15">██</span>                   <span class="a">│</span>              
+          <span class="a">│</span> <span class="d">        black … white, pick one to change it</span>                             <span class="a">│</span>              
+          <span class="a">│</span>                                                                          <span class="a">│</span>              
+          <span class="a">│</span> <span class="d">Enter on a colour opens a list: this theme&#x27;s colours, Catppuccin&#x27;s,</span>      <span class="a">│</span>              
+          <span class="a">│</span> <span class="d">or a code you type, like #1e1e2e. The preview follows as you go.</span>         <span class="a">│</span>              
+          <span class="a">│</span>                                                                          <span class="a">│</span>              
+          <span class="a">│</span>                                            <span class="pri"> Keep these colours </span>  <span class="btn"> Cancel </span><span class="a">│</span>              
+          <span class="a">╰──────────────────────────────────────────────────────────────────────────╯</span>              
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">Tab</span> <span class="d">next colour</span>  ·  <span class="a">Enter</span> <span class="d">change it</span>  ·  <span class="a">Esc</span> <span class="d">cancel</span>  ·  <span class="a">?</span> <span class="d">all keys</span>                                  </span></pre></div>
+</section>
+
+<section id="shortcuts">
+  <h2>4 · Shortcuts</h2>
+  <p class="prose">Your shortcuts first, then Alacritty's own, greyed and fixed: they can be turned off but not edited, since Alacritty supplies them. Every shortcut is described in words ("Make the text bigger"), and hidden characters are named ("Esc, Enter") instead of printed.</p>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview    S<span class="u">e</span>ttings    <span class="u">T</span>hemes   <span class="act"> Shortcuts </span>   Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+  <span class="v b">Shortcuts</span>   <span class="d">keys that do something in Alacritty, yours first</span>                                      
+                                                                                                    
+  <span class="a">╭─────────────────────────────────────────────────────────────────────────────────────────────╮</span>   
+  <span class="a">│</span> <span class="a b">Keys                 Does                                        From                      </span> <span class="a">│</span>   
+  <span class="a">│</span> <span class="sel">Ctrl+Shift+V         Paste                                       yours                     </span> <span class="a">│</span>   
+  <span class="a">│</span> Ctrl+Shift+C         Copy                                        yours                      <span class="a">│</span>   
+  <span class="a">│</span> Ctrl + +             Make the text bigger                        yours                      <span class="a">│</span>   
+  <span class="a">│</span> Ctrl + -             Make the text smaller                       yours                      <span class="a">│</span>   
+  <span class="a">│</span> Shift+Enter          Types: Esc, Enter                           yours                      <span class="a">│</span>   
+  <span class="a">│</span> <span class="d">Ctrl+Shift+F         Search forward                              Alacritty · fixed         </span> <span class="a">│</span>   
+  <span class="a">│</span> <span class="d">Ctrl+Shift+Space     Vi mode on or off                           Alacritty · fixed         </span> <span class="a">│</span>   
+  <span class="a">│</span> <span class="d">Ctrl+0               Text size back to normal                    Alacritty · fixed         </span> <span class="a">│</span>   
+  <span class="a">│</span> <span class="d">…  41 more from Alacritty</span>                                                                   <span class="a">│</span>   
+  <span class="a">╰─────────────────────────────────────────────────────────────────────────────────────────────╯</span>   
+                                                                                                    
+  <span class="btn"> Add a shortcut…  + </span>  <span class="btn"> Change  F2 </span>  <span class="btn"> Remove… </span>  <span class="btn"> Turn off one of Alacritty&#x27;s… </span>                     
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">↑↓</span> <span class="d">pick</span>  ·  <span class="a">+</span> <span class="d">add</span>  ·  <span class="a">F2</span> <span class="d">change</span>  ·  <span class="a">Tab</span> <span class="d">buttons</span>  ·  <span class="a">F10</span> <span class="d">save</span>  ·  <span class="a">?</span> <span class="d">all keys</span>                        </span></pre></div>
+  <h3>Add a shortcut (question 6)</h3>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview    S<span class="u">e</span>ttings    <span class="u">T</span>hemes   <span class="act"> Shortcuts </span>   Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+            <span class="a">╭─ Add a shortcut ─────────────────────────────────────────────────────────╮</span>            
+            <span class="a">│</span>                                                                          <span class="a">│</span>            
+            <span class="a">│</span> <span class="b">1  The keys</span>                                                              <span class="a">│</span>            
+            <span class="a">│</span>    <span class="foc">  Ctrl + Shift + T                     </span>  <span class="d">press them now</span>               <span class="a">│</span>            
+            <span class="a">│</span>    <span class="d">or pick:</span> <span class="fld"> T ▼ </span>  <span class="fld"> ☒ Ctrl  ☒ Shift  ☐ Alt  ☐ Super </span>                     <span class="a">│</span>            
+            <span class="a">│</span>    <span class="ok">✓ free: nothing else uses Ctrl+Shift+T</span>                                <span class="a">│</span>            
+            <span class="a">│</span>                                                                          <span class="a">│</span>            
+            <span class="a">│</span> <span class="b">2  What it does</span>                                                          <span class="a">│</span>            
+            <span class="a">│</span>    <span class="fld"> (•) An action   ( ) Type text   ( ) Run a program </span>                   <span class="a">│</span>            
+            <span class="a">│</span>    <span class="fld"> Open a new window                                 ▼ </span>                 <span class="a">│</span>            
+            <span class="a">│</span>    <span class="d">94 actions in plain words, grouped: windows, text, search, vi mode</span>    <span class="a">│</span>            
+            <span class="a">│</span>                                                                          <span class="a">│</span>            
+            <span class="a">│</span> <span class="b">3  When</span>  <span class="fld"> (•) Always  ( ) Only in vi mode  ( ) Only while searching </span>     <span class="a">│</span>            
+            <span class="a">│</span>                                                                          <span class="a">│</span>            
+            <span class="a">│</span>                                               <span class="pri"> Add it </span>  <span class="btn"> Cancel </span>         <span class="a">│</span>            
+            <span class="a">╰──────────────────────────────────────────────────────────────────────────╯</span>            
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">keys</span> <span class="d">record</span>  ·  <span class="a">Tab</span> <span class="d">next part</span>  ·  <span class="a">Enter</span> <span class="d">add it</span>  ·  <span class="a">Esc</span> <span class="d">cancel</span>                                      </span></pre></div>
+  <p class="cap">The terminal alacrittyForge runs in may keep a few combinations for itself (it can't see them); the lists under "or pick" always work. A combination already in use says what it would replace.</p>
+</section>
+
+<section id="backups">
+  <h2>5 · Backups</h2>
+  <p class="prose">New as a screen. Why each backup was made, in plain words, and what restoring it would change, before you do. A save makes exactly one backup, however many changes it holds.</p>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview    S<span class="u">e</span>ttings    <span class="u">T</span>hemes    Shortc<span class="u">u</span>ts   <span class="act"> Backups </span>  <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+  <span class="v b">Backups</span>   <span class="d">newest first · last 20 kept · ~/.config/alacritty/backups</span>                               
+                                                                                                    
+  <span class="a">╭──────────────────────────────────────────╮</span>  <span class="a">╭─ Restoring this would change ──────────────────╮</span>  
+  <span class="a">│</span> <span class="a b">When             Why it was made     </span>    <span class="a">│</span>  <span class="a">│</span> <span class="m">Theme    </span> <span class="pc">KognogOS-theme → (none)</span>              <span class="a">│</span>  
+  <span class="a">│</span> <span class="sel"> Aug 9  20:35     Before using a theme</span>   <span class="a">│</span>  <span class="a">│</span> <span class="m">Opacity  </span> <span class="pc">95% → 100%</span>                           <span class="a">│</span>  
+  <span class="a">│</span>  May 28 17:06     Before a save          <span class="a">│</span>  <span class="a">│</span> <span class="m">Shortcuts</span> <span class="pc">5 → 3 of yours</span>                       <span class="a">│</span>  
+  <span class="a">│</span>  Apr 6  21:46     Before a save          <span class="a">│</span>  <span class="a">│</span> <span class="d">Everything else is the same as today.</span>          <span class="a">│</span>  
+  <span class="a">╰──────────────────────────────────────────╯</span>  <span class="a">╰────────────────────────────────────────────────╯</span>  
+                                                                                                    
+  <span class="pri"> Restore…  R </span>  <span class="btn"> Back up now  N </span>  <span class="btn"> Show whole file </span>  <span class="btn"> Delete…  D </span>                                  
+                                                                                                    
+                                                                                                    
+<span class="hdr"> <span class="a">↑↓</span> <span class="d">pick</span>  ·  <span class="a">R</span> <span class="d">restore</span>  ·  <span class="a">N</span> <span class="d">back up</span>  ·  <span class="a">D</span> <span class="d">delete</span>  ·  <span class="a">?</span> <span class="d">all keys</span>                                    </span></pre></div>
+</section>
+
+<section id="save">
+  <h2>Saving</h2>
+  <p class="prose"><b>F10</b> opens a review of every change, old → new, then saves: one backup, then a safe write that keeps your comments and layout (the new file is written next to the old one and swapped in only when it is complete). There is no Rebuild step: Alacritty notices the file and uses the changes in every open window. The few that need a new window (size, how it opens) say so in their row and in the review.</p>
+  <div class="term"><pre><span class="hdr"> <span class="v b">alacrittyForge 1.0.0</span><span class="m"> · Alacritty settings</span>          <span class="m">KognogOS · javier · Alacritty reloads by itself</span> </span>
+<span class="bar">  <span class="u">O</span>verview   <span class="act"> Settings </span>   <span class="u">T</span>hemes    Shortc<span class="u">u</span>ts    Bac<span class="u">k</span>ups   <span class="u">H</span>elp ▾  <span class="u">Q</span>uit                             </span>
+                                                                                                    
+              <span class="a">╭──────────────────────────────────────────────────────────────────────╮</span>              
+              <span class="a">│</span>                                                                      <span class="a">│</span>              
+              <span class="a">│</span> <span class="a b">Review before saving</span>                                                 <span class="a">│</span>              
+              <span class="a">│</span>                                                                      <span class="a">│</span>              
+              <span class="a">│</span> <span class="b">Settings</span>  <span class="d">~/.config/alacritty/alacritty.toml</span>                         <span class="a">│</span>              
+              <span class="a">│</span>   Opacity                95%  →  <span class="pc">90%</span>                                 <span class="a">│</span>              
+              <span class="a">│</span>   Theme                  KognogOS-theme  →  <span class="pc">hypeforge-mocha</span>          <span class="a">│</span>              
+              <span class="a">│</span> <span class="b">Shortcuts</span>                                                            <span class="a">│</span>              
+              <span class="a">│</span>   <span class="ok">+</span> Ctrl+Shift+T         <span class="pc">opens a new window</span>                          <span class="a">│</span>              
+              <span class="a">│</span>                                                                      <span class="a">│</span>              
+              <span class="a">│</span> <span class="b">What happens</span>                                                         <span class="a">│</span>              
+              <span class="a">│</span>   1  A backup of your settings is made                               <span class="a">│</span>              
+              <span class="a">│</span>   2  The changes are written; your comments and layout stay          <span class="a">│</span>              
+              <span class="a">│</span>   3  Alacritty picks them up right away, in every open window        <span class="a">│</span>              
+              <span class="a">│</span>                                                                      <span class="a">│</span>              
+              <span class="a">│</span>                                                <span class="pri"> Save </span>  <span class="btn"> Cancel </span>      <span class="a">│</span>              
+              <span class="a">╰──────────────────────────────────────────────────────────────────────╯</span>              
+                                                                                                    
+                                                                                                    
+<span class="bar"> <span class="pc">●</span> <span class="pc">3 changes not saved yet</span>                                                   <span class="pri"> Save…  F10 </span> <span class="btn"> Discard </span> </span>
+<span class="hdr"> <span class="a">Tab</span> <span class="d">buttons</span>  ·  <span class="a">Enter</span> <span class="d">choose</span>  ·  <span class="a">Esc</span> <span class="d">back to editing</span>                                               </span></pre></div>
+  <h3>Quitting, and the note it leaves</h3>
+  <p class="prose">Quitting with unsaved changes asks first, with Save, Quit without saving, and Stay. When alacrittyForge closes, the terminal keeps a short record, the same as grubForge and nog.</p>
+  <div class="term"><pre><span class="d">javier@tphome-linux ~&gt; </span>alacrittyforge                                                               
+                                                                                                    
+<span class="a b">==&gt; alacrittyForge 1.0.0</span><span class="d"> · alacrittyforge · Fri Oct 2, 09:10</span>                                        
+                                                                                                    
+<span class="ok b">==&gt; Done</span>                                                                                            
+    Saved 3 changes at 09:14. Alacritty is already using them.                                      
+    Newest backup: alacritty_20261002_091402.bak.toml                                               
+    Log: ~/.local/share/alacrittyforge/logs/                                                        
+                                                                                                    
+    <span class="m">Thank you for using alacrittyForge.</span>                                                             
+                                                                                                    
+<span class="d">javier@tphome-linux ~&gt; </span>                                                                             </pre></div>
+</section>
+
+<section id="help">
+  <h2>Help and the manual</h2>
+  <div class="two">
+    <div class="card"><b>Quick help</b><p><kbd>F1</kbd> on any setting opens its manual page; <kbd>?</kbd> lists every key. The hint line always shows the keys that work right now.</p></div>
+    <div class="card"><b>The manual</b> (<kbd>M</kbd>)<p>Getting started · Window · Text and fonts · Cursor · Scrolling and copy · Bell · Shell and start · Themes and colours · Shortcuts · Backups and undo · Changes made elsewhere · On a text console · All keys.</p></div>
+  </div>
+</section>
+
+<section id="keys">
+  <h2>Keys</h2>
+  <div class="tw"><table>
+    <thead><tr><th>Key</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td><kbd>1</kbd>–<kbd>5</kbd>, or <kbd>Ctrl</kbd> + the underlined letter</td><td>Overview, Settings, Themes, Shortcuts, Backups (Ctrl+C stays "stop", never a screen)</td></tr>
+      <tr><td><kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> · <kbd>Enter</kbd> · <kbd>Space</kbd> · <kbd>Esc</kbd></td><td>next / previous · open a list or press · flip a switch · close a window</td></tr>
+      <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>move between presets</td></tr>
+      <tr><td><kbd>F10</kbd> or <kbd>S</kbd></td><td>save, with a review first</td></tr>
+      <tr><td><kbd>R</kbd> · <kbd>F1</kbd> · <kbd>M</kbd> · <kbd>?</kbd> · <kbd>Q</kbd></td><td>read the file again · help on this · the manual · all keys · quit (asks if something is unsaved)</td></tr>
+      <tr><td><kbd>Enter</kbd> · <kbd>A</kbd> (Themes)</td><td>use this theme · adjust colours</td></tr>
+      <tr><td><kbd>+</kbd> · <kbd>F2</kbd> · <kbd>Delete</kbd> (Shortcuts)</td><td>add · change · remove</td></tr>
+      <tr><td><kbd>R</kbd> · <kbd>N</kbd> · <kbd>D</kbd> (Backups)</td><td>restore · back up now · delete</td></tr>
+    </tbody>
+  </table></div>
+  <p class="cap">Letter keys never act while you're typing in a field. <code>alacrittyforge --version</code> and <code>--help</code> print instead of opening the app.</p>
+</section>
+
+<section id="console">
+  <h2>On a plain text console</h2>
+  <p class="prose">Like grubForge, every screen must be readable on the text console (<kbd>Ctrl+Alt+F3</kbd>): 16 colours, a small font, no emoji. forgekit switches by itself; the work here is to take every fixed colour and symbol out of alacrittyForge's screens (today: about 70 colour codes and a dozen emoji) and use forgekit's roles instead. The same tests as grubForge check that nothing is cut off at 100 columns.</p>
+  <div class="term con"><pre><span class="c-bl"> alacrittyForge 1.0.0 · Alacritty settings            KognogOS · javier · Alacritty reloads itself </span>
+ <span class="c-pri"> Overview </span>  S<span class="c-cy">e</span>ttings  <span class="c-cy">T</span>hemes  Shortc<span class="c-cy">u</span>ts  Bac<span class="c-cy">k</span>ups  <span class="c-cy">H</span>elp F1  <span class="c-cy">Q</span>uit
+
+  <span class="c-cy">┌ Your terminal ───────────────────────────────┐</span>  <span class="c-y">┌ Needs attention ─────────────────────────────┐</span>
+  <span class="c-cy">│</span> Theme      KognogOS-theme                    <span class="c-cy">│</span>  <span class="c-y">│</span> <span class="c-g">+ Nothing needs attention.</span>                   <span class="c-y">│</span>
+  <span class="c-cy">│</span> Font       JetBrainsMono Nerd Font · 12      <span class="c-cy">│</span>  <span class="c-y">│</span>                                              <span class="c-y">│</span>
+  <span class="c-cy">└──────────────────────────────────────────────┘</span>  <span class="c-y">└──────────────────────────────────────────────┘</span>
+
+ <span class="c-cy">Tab</span> next button  *  <span class="c-cy">Enter</span> do it  *  <span class="c-cy">1-5</span> screens  *  <span class="c-cy">F1</span> help  *  <span class="c-cy">?</span> all keys</pre></div>
+</section>
+
+<section id="plan">
+  <h2>How it gets built</h2>
+  <ol>
+    <li><b>Safe saving first</b>, with tests: one backup per save, the safe write that keeps comments, refusing to save over a file it couldn't read, empty values handled, shortcuts saved whole. Proven against copies of real settings files before any screen changes.</li>
+    <li><b>The frame, Overview and Settings</b> on forgekit 0.5.0's pieces, including every setting from the table above.</li>
+    <li><b>Themes and colours.</b></li>
+    <li><b>Shortcuts</b>, with key recording.</li>
+    <li><b>Backups, the manual, <code>--version</code>/<code>--help</code>, the closing note, the text console, 100 columns</b>; the name everywhere becomes <b>alacrittyForge</b>.</li>
+    <li><b>Testing:</b> a written test matrix; automated tests per screen; your own run in the KognogOS VM as a real package upgrade from 0.2.0; then the release (GitHub and the AUR), issues opened and closed for every finding.</li>
+  </ol>
+  <p class="cap">If a piece turns out useful to bitlaForge and nogForge too (key recording, colour swatches), it moves into forgekit, as grubForge's did.</p>
+</section>
+
+</div>
