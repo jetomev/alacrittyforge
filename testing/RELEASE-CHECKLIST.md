@@ -36,9 +36,17 @@ Before tagging, all of these must agree on the version string:
 
 ## Doc coverage
 
-- README and man page must list every binding in `app.py` `BINDINGS` + every screen `BINDINGS` (excluding `show=False` aliases).
-- Help overlay (`widgets/help_screen.py`) must match the bindings actually defined in the codebase. When a screen's `BINDINGS` changes, the help text changes with it.
-- Backup retention cap mentioned in the docs must match `MAX_BACKUPS` in `backup_manager.py`.
+- README and man page list every key in `app.py` `BINDINGS` and each screen's `BINDINGS`.
+- The manual (`alacrittyforge/manual/`) names every setting on its group's page: `tests/test_manual.py` enforces it, and that F1 lands on the right page.
+
+## v1.0.0+ gates
+
+- **All tests, no warnings:** `PYTHONPATH=../forgekit python -W default -m unittest tests.test_saving tests.test_session tests.test_themes tests.test_bindings tests.test_versions tests.test_manual tests.test_screens` (the AUR `check()` runs the same). Report the count; it was 80 at 1.0.0.
+- **100 columns, 25 lines:** the `*_100_columns` and `*_25_line_console` tests are the guard; also look at every screen with forgekit's `tools/console-preview.py --size 100x30`.
+- **Every major distribution:** `scripts/vm-distro-check.py` in grubForge's distro VMs (Ubuntu 24.04 = Alacritty 0.13, Debian 13 = 0.15, Fedora/openSUSE = 0.17): tests there, each distribution's own Alacritty reads a saved file with no warning, and warns on the wrong names.
+- **A real package upgrade before the tag:** `scripts/make-rc-packages.sh`, installed **with nog** (`nog install ./file.pkg.tar.zst`) over the released version in the KognogOS VM, for the human run. A fresh snapshot may need `nog update` first (its package lists).
+- **python-forgekit first:** the AUR must have the forgekit version alacrittyforge depends on before the alacrittyforge push.
+- **Your real files:** anything that renders screenshots works on a copy of `alacritty.toml`; check the real one's checksum before and after.
 
 ## Co-author credit
 
