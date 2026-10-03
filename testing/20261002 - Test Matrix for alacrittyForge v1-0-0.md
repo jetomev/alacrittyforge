@@ -59,3 +59,11 @@ Setup by Claude (2 Oct, done): `kognog-hypeforge` from `clean-install-3` (alacri
 | 10.13 | Ctrl+Alt+F3, log in, `alacrittyforge` | readable and usable on the text console | — | |
 | 10.14 | Anything that looks wrong, reads badly, or is slow | noted here as F-n | — | |
 
+**Javier's verdict (2 Oct, ~22:30): "fantastic job my friend. alacrittyForge its a beautiful piece of software. I am incredibly happy with the results!!!"**
+
+Read back from the VM afterwards (alacrittyForge's run log, the backups and their notes, the files' times, the login journal):
+- 2 runs, 22:21–22:25. **9 saves**, each with exactly **one** backup ("Before a save"); the closing record says "Alacritty is already using them".
+- Then a **restore**: a "pre-restore" backup first, and the settings file is now **byte for byte** the backup made before the first save. The notes in the file (`# solid: transparency made the light themes look bad (Javier, 2026-09-30)`, the hypeForge comments) came through every save unchanged.
+- Five hypeForge theme files show 22:21:39: **hypeForge rewrote them at login** (login 22:21:36; `~/.config/hypeforge` changed the same second; `hypeforge-current`, which hypeForge doesn't regenerate at login, is unchanged since 30 Sep). alacrittyForge never writes existing theme files (`test_themes.py`).
+
+Rows 10.1–10.6, 10.8–10.12, 10.14: **PASS** on Javier's word and the log. **10.7 (Adjust colours) is not in the log**: no "(mine)" copy exists, and a restore doesn't remove theme files. **10.13 (text console)** can't be read from the log. No findings reported.
