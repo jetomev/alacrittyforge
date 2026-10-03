@@ -4,6 +4,8 @@
 
 **Current release: v1.0.0** (2 Oct 2026): rebuilt to match grubForge 2.0, "so far the best of the 3" (Javier). Next: #16 hints, #17 mouse shortcuts.
 
+- [x] Installed on the desktop through nog (2 Oct, 22:50): alacrittyforge 1.0.0-1, python-forgekit 0.5.1-1, python-tomlkit — the public AUR path works. Javier used it right away: 5 saves, one backup each; the 0.2.0-era backups still listed.
+
 ## Next — the grubForge 2.0 look (Javier, 2026-10-02)
 Same method as grubForge 2.0, which worked:
 - [x] Project kit: `CLAUDE.md` + this TODO (2 Oct); GitHub About/topics checked; Vault folder exists
