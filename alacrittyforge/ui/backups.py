@@ -76,11 +76,11 @@ class BackupsScreen(Horizontal):
             yield t
             yield Static("", id="bk-where")
             with Horizontal(classes="forge-buttons bk-actions"):
-                yield Button(f"Restore{glyph('ellipsis')}  R", id="bk-restore", variant="primary")
-                yield Button("Back up now  N", id="bk-new")
+                yield Button(f"Restore{glyph('ellipsis')} (r)", id="bk-restore", variant="primary")
+                yield Button("Back Up Now (n)", id="bk-new")
             with Horizontal(classes="forge-buttons bk-actions"):
-                yield Button("Show whole file", id="bk-show")
-                yield Button(f"Delete{glyph('ellipsis')}  D", id="bk-delete")
+                yield Button("Show Whole File", id="bk-show")
+                yield Button(f"Delete{glyph('ellipsis')} (d)", id="bk-delete")
         with VerticalScroll(id="bk-right", classes="af-box", can_focus=False):
             yield Static("", id="bk-diff")
 
@@ -113,7 +113,7 @@ class BackupsScreen(Horizontal):
             self._show(self.items[t.cursor_row])
         else:
             self.query_one("#bk-diff", Static).update(
-                "[$forge-muted]No backups yet. Every save makes one; Back up now makes one any time.[/]")
+                "[$forge-muted]No backups yet. Every save makes one; [b]Back Up Now (n)[/] makes one any time.[/]")
         for bid in ("#bk-restore", "#bk-show", "#bk-delete"):
             self.query_one(bid, Button).disabled = not self.items
 
@@ -151,7 +151,7 @@ class BackupsScreen(Horizontal):
         if self.session.change_count:
             lines.append("Your unsaved changes are dropped.")
         ok = await self.app.push_screen_wait(ConfirmDialog(
-            "[b]Restore this backup?[/]\n\n" + "\n".join(lines), confirm_label="Restore", default_no=True))
+            "[b]Restore this backup?[/]\n\n" + "\n".join(lines), confirm_label="Restore (y)", default_no=True))
         if not ok:
             return
         self.session.discard()
@@ -170,7 +170,7 @@ class BackupsScreen(Horizontal):
             return
         ok = await self.app.push_screen_wait(ConfirmDialog(
             f"[b]Delete this backup?[/]\n\nThe backup from {when(b.made)} ({b.why.lower()}) is deleted for good.",
-            confirm_label="Delete", danger=True, default_no=True))
+            confirm_label="Delete (y)", danger=True, default_no=True))
         if ok:
             backups.delete(b)
             self.refresh_view()

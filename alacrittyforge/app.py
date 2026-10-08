@@ -1,4 +1,4 @@
-"""alacrittyForge v1.0.0 — the app frame, on forgekit.
+"""alacrittyForge v1.1.0 — the app frame, on forgekit.
 
 The frame is forgekit's (title bar, menu bar, changes bar, hint bar); the
 screens are alacrittyForge's. All file work goes through the Session.
@@ -9,6 +9,13 @@ Javier's rulings for 1.0.0 (2 Oct 2026, docs/design/v1.0.0-screens.html):
 * every Alacritty setting on Linux, in plain words, picked not typed;
 * a save keeps your comments and layout, with a review first and one backup;
 * no Rebuild step: Alacritty picks a saved change up by itself.
+
+1.1.0 (#19, #20): the menu keys come from forgekit 0.10.0 (a number 1-6 and
+Ctrl + the underlined letter for every entry, Help included); started with
+--hypeforge, the app is a page of hypeForge Settings and has no Quit; every
+button reads "Words In Title Case (k)", with its key in brackets. An open window
+(Add a shortcut, a review) keeps its own keys: forgekit 0.10.0 lets no menu key
+but Quit through it, so the key recorder records Ctrl+T and the rest.
 """
 
 from __future__ import annotations
@@ -23,8 +30,8 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Static
 
 from forgekit import (
-    FORGE_CSS, GPL3_NOTICE, ChangeGroup, ForgeApp, ForgeModal, ForgePanelScreen, ManualScreen, Notice,
-    ReviewDialog, load_pages,
+    FORGE_CSS, GPL3_NOTICE, MENU_HINT, ChangeGroup, ForgeApp, ForgeModal, ForgePanelScreen, ManualScreen,
+    Notice, ReviewDialog, load_pages,
 )
 
 from . import __version__, backups
@@ -120,7 +127,7 @@ class QuitDialog(ForgeModal[str | None]):
             with Horizontal(classes="forge-buttons forge-panel-footer"):
                 for label, bid, primary in self._buttons:
                     yield Button(label, id=bid, variant="primary" if primary else "default")
-                yield Button("Stay", id="stay")
+                yield Button("Stay (Esc)", id="stay")
 
     def on_mount(self) -> None:
         self.query_one(f"#{self._buttons[0][1]}", Button).focus()
@@ -168,22 +175,19 @@ class AlacrittyForgeApp(ForgeApp):
         ("Space", "flip a switch"),
         ("↑↓ in a number", "step through its presets"),
         ("Esc", "close a window"),
-        ("1-5, Ctrl+letter", "go to a screen (the underlined letter)"),
+        ("1-6", "go to a menu entry: the five screens, then Help"),
+        ("Ctrl+letter", "the same, by its underlined letter"),
         ("F10 or S", "save, with a review first"),
         ("R", "read the file again"),
         ("F1", "help on what is selected"),
         ("M", "the manual"),
         ("?", "this list"),
         ("Q or Ctrl+Q", "quit (asks first if something isn't saved)"),
+        ("", "none inside hypeForge Settings: close it there"),
     ]
-    HINTS = [("Tab", "next"), ("1-5", "screens"), ("F10", "save"), ("F1", "help"), ("?", "all keys")]
+    HINTS = [("Tab", "next"), MENU_HINT, ("F10", "save"), ("F1", "help"), ("?", "all keys")]
+    # 1.1.0: the numbers and Ctrl+<underlined letter> for the menu are forgekit 0.10.0's (#19)
     BINDINGS = [
-        Binding("1", "go('overview')", show=False), Binding("2", "go('settings')", show=False),
-        Binding("3", "go('themes')", show=False), Binding("4", "go('shortcuts')", show=False),
-        Binding("5", "go('backups')", show=False),
-        Binding("ctrl+o", "go('overview')", show=False), Binding("ctrl+e", "go('settings')", show=False),
-        Binding("ctrl+t", "go('themes')", show=False), Binding("ctrl+u", "go('shortcuts')", show=False),
-        Binding("ctrl+k", "go('backups')", show=False),
         Binding("f10", "save", show=False, priority=True), Binding("s", "save", show=False),
         Binding("r", "reload", show=False),
         Binding("f1", "field_help", show=False, priority=True),
@@ -219,9 +223,6 @@ class AlacrittyForgeApp(ForgeApp):
         self.refresh_state()
 
     # ── navigation ───────────────────────────────────────────────────────────
-    def action_go(self, section: str) -> None:
-        self._switch_section(section)
-
     def on_section_shown(self, section_id: str) -> None:
         # the file may have changed outside alacrittyForge: read it again;
         # unsaved changes stay
@@ -274,7 +275,7 @@ class AlacrittyForgeApp(ForgeApp):
         n = s.change_count
         if n:
             bar.show(f"{n} change{'s' if n != 1 else ''} not saved yet", "changed",
-                     [("Save…  F10", "af-save", True), ("Discard", "af-discard", False)])
+                     [("Save… (s)", "af-save", True), ("Discard", "af-discard", False)])
         else:
             bar.hide()
 
@@ -395,7 +396,7 @@ class AlacrittyForgeApp(ForgeApp):
             self.push_screen(QuitDialog(
                 f"{n} change{'s are' if n != 1 else ' is'} not saved",
                 ["Quitting now loses them."],
-                [("Save first", "save", True), ("Quit without saving", "quit", False)]), self._after_quit_choice)
+                [("Save First", "save", True), ("Quit Without Saving", "quit", False)]), self._after_quit_choice)
             return False
         return True
 

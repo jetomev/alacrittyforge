@@ -92,12 +92,12 @@ class ThemesScreen(Horizontal):
             yield Static("", id="th-swatches")
             yield Static("", id="th-info")
             with Horizontal(classes="forge-buttons th-actions"):
-                yield Button("Use this theme", id="th-use", variant="primary")
-                yield Button(f"Adjust colours{glyph('ellipsis')}", id="th-adjust")
+                yield Button("Use This Theme", id="th-use", variant="primary")
+                yield Button(f"Adjust Colours{glyph('ellipsis')} (a)", id="th-adjust")
             with Horizontal(classes="forge-buttons th-actions"):
-                yield Button(f"Save my colours as a theme{glyph('ellipsis')}", id="th-saveown")
-                yield Button(f"Install a theme{glyph('ellipsis')}  I", id="th-install")
-                yield Button("Where to get themes", id="th-get")
+                yield Button(f"Save My Colours as a Theme{glyph('ellipsis')}", id="th-saveown")
+                yield Button(f"Install a Theme{glyph('ellipsis')} (i)", id="th-install")
+                yield Button("Where to Get Themes", id="th-get")
 
     def on_mount(self) -> None:
         self.refresh_view()
@@ -182,7 +182,7 @@ class ThemesScreen(Horizontal):
             info.append("Written in your settings file itself. A theme file you use replaces them.")
         elif t.locked:
             info.append(f"Made by {t.locked_by}, which rewrites it, so it is locked: use it as it is, or "
-                        "Adjust colours to make your own copy.")
+                        f"press Adjust Colours{glyph('ellipsis')} (a) to make your own copy.")
         elif t.pending:
             info.append("New: it is written when you save (F10).")
         self.query_one("#th-info", Static).update("\n".join(f"[$forge-muted]{escape(x)}[/]" for x in info))
@@ -290,7 +290,7 @@ class WhereToGet(ForgePanelScreen):
             "Alacritty's own collection has over a hundred themes, each one file:\n\n"
             f"[b]{GET_THEMES}[/]\n\n"
             "Open a theme there, download its .toml file (the Download raw file button), then come back "
-            "and choose [b]Install a theme…[/] (or press [b]I[/]). Files in your Downloads folder are "
+            "and choose [b]Install a Theme… (i)[/]. Files in your Downloads folder are "
             "listed. Only files that change colours, and nothing else, are installed.")
 
 
@@ -317,8 +317,8 @@ class AdjustColours(ForgeModal[dict | None]):
                 yield t
                 yield Static("", id="ad-preview")
             with Horizontal(classes="forge-buttons forge-panel-footer"):
-                yield Button("Keep these colours", id="ad-keep", variant="primary")
-                yield Button("Cancel", id="ad-cancel")
+                yield Button("Keep These Colours", id="ad-keep", variant="primary")
+                yield Button("Cancel (Esc)", id="ad-cancel")
 
     def on_mount(self) -> None:
         t = self.query_one("#ad-table", DataTable)

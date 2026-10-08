@@ -14,7 +14,7 @@ from textual.app import ComposeResult
 from textual.containers import Grid, Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Static
 
-from forgekit import glyph
+from forgekit import MENU_HINT, glyph
 
 from .. import backups
 from ..alacritty import shown_version
@@ -48,7 +48,7 @@ def theme_name(session) -> str:
 
 
 class OverviewScreen(VerticalScroll, can_focus=False):
-    FORGE_HINTS = [("Tab", "next button"), ("Enter", "do it"), ("1-5", "screens"), ("F1", "help"), ("?", "all keys")]
+    FORGE_HINTS = [("Tab", "next button"), ("Enter", "do it"), MENU_HINT, ("F1", "help"), ("?", "all keys")]
 
     def __init__(self, session, **kw) -> None:
         super().__init__(**kw)
@@ -61,18 +61,18 @@ class OverviewScreen(VerticalScroll, can_focus=False):
             with Vertical(classes="af-box af-attention", id="box-attention"):
                 yield Vertical(id="ov-attention")
                 with Horizontal(classes="forge-buttons af-box-buttons", id="ov-attention-buttons"):
-                    yield Button("Restore the newest backup", id="ov-restore", variant="primary")
-                    yield Button("Update them", id="ov-rename", variant="primary")
+                    yield Button("Restore the Newest Backup", id="ov-restore", variant="primary")
+                    yield Button("Update Them", id="ov-rename", variant="primary")
             with Vertical(classes="af-box", id="box-safety"):
                 yield Static("", id="ov-safety")
             with Vertical(classes="af-box", id="box-tasks"):
                 yield Static("", id="ov-tasks")
                 with Horizontal(classes="forge-buttons af-task-row"):
-                    yield Button("Pick a theme", id="task-theme")
-                    yield Button("Change the font", id="task-font")
+                    yield Button("Pick a Theme", id="task-theme")
+                    yield Button("Change the Font", id="task-font")
                 with Horizontal(classes="forge-buttons af-task-row"):
-                    yield Button("Text size", id="task-size")
-                    yield Button("Back up now", id="task-backup")
+                    yield Button("Text Size", id="task-size")
+                    yield Button("Back Up Now", id="task-backup")
 
     def on_mount(self) -> None:
         for box, title in (("box-terminal", "Your terminal"), ("box-attention", "Needs attention"),

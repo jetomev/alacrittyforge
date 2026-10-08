@@ -47,12 +47,12 @@ class ShortcutsScreen(Vertical):
         t.FORGE_HINTS = self.FORGE_HINTS
         yield t
         with Horizontal(classes="forge-buttons sc-actions"):
-            yield Button(f"Add a shortcut{glyph('ellipsis')}  +", id="sc-add", variant="primary")
-            yield Button("Change  F2", id="sc-change")
-            yield Button("Remove", id="sc-remove")
-            yield Button("Turn this one off", id="sc-off")
+            yield Button(f"Add a Shortcut{glyph('ellipsis')} (+)", id="sc-add", variant="primary")
+            yield Button("Change (F2)", id="sc-change")
+            yield Button("Remove (Del)", id="sc-remove")
+            yield Button("Turn This One Off", id="sc-off")
         with Horizontal(classes="forge-buttons sc-actions"):
-            yield Button("Show vi and search keys", id="sc-modes")
+            yield Button("Show Vi and Search Keys", id="sc-modes")
 
     def on_mount(self) -> None:
         self.query_one("#sc-table", DataTable).add_columns("Keys", "Does", "From")
@@ -80,8 +80,8 @@ class ShortcutsScreen(Vertical):
             self.rows.append(("alacritty", d))
         if self.rows:
             t.move_cursor(row=min(keep or 0, len(self.rows) - 1))
-        self.query_one("#sc-modes", Button).label = ("Hide vi and search keys" if self.show_modes
-                                                    else "Show vi and search keys")
+        self.query_one("#sc-modes", Button).label = ("Hide Vi and Search Keys" if self.show_modes
+                                                    else "Show Vi and Search Keys")
         self._buttons()
 
     @staticmethod
@@ -109,7 +109,7 @@ class ShortcutsScreen(Vertical):
         off_btn = self.query_one("#sc-off", Button)
         off_btn.display = cur is not None and cur[0] == "alacritty"
         if cur is not None and cur[0] == "alacritty":
-            off_btn.label = "Turn it back on" if kb.turned_off(cur[1], self.yours()) else "Turn this one off"
+            off_btn.label = "Turn It Back On" if kb.turned_off(cur[1], self.yours()) else "Turn This One Off"
         off_btn.disabled = not ok
 
     def _stage(self, new: list[dict]) -> None:
@@ -271,8 +271,8 @@ class ShortcutDialog(ForgeModal[dict | None]):
                 yield Select([(w, v or ALWAYS) for v, w in kb.MODES], value=str(ex.get("mode") or ALWAYS),
                              allow_blank=False, id="sd-mode")
             with Horizontal(classes="forge-buttons forge-panel-footer"):
-                yield Button("Keep the change" if self.existing else "Add it", id="sd-ok", variant="primary")
-                yield Button("Cancel", id="sd-cancel")
+                yield Button("Keep the Change" if self.existing else "Add It", id="sd-ok", variant="primary")
+                yield Button("Cancel (Esc)", id="sd-cancel")
 
     def on_mount(self) -> None:
         self._show_kind()
