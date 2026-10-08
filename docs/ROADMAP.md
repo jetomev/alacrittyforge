@@ -2,6 +2,12 @@
 
 *The README carries the upcoming work and the two most recent releases; everything older lives here, newest-first.*
 
+### v1.1.0 — October 8, 2026
+- [x] 1 – 6 and Ctrl + the underlined letter for every menu entry, Help included, from forgekit 0.10.0 (#19, F-8)
+- [x] "1-6 menu" in the bottom bar
+- [x] `--hypeforge`: no Quit inside hypeForge Settings; Settings closes it, asking first (#20)
+- [x] Every button names its key: "Back Up Now (n)" (#20)
+
 ### v1.0.0 — October 2, 2026
 - [x] Safe saving: notes and layout kept, one backup per save, never over an unreadable file, written in one step
 - [x] Every Alacritty setting on Linux, in plain words, in eight groups

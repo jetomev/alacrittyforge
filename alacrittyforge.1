@@ -1,6 +1,6 @@
 .\" alacrittyforge.1 — alacrittyForge man page
 .\" GNU GPL v3 — see LICENSE
-.TH ALACRITTYFORGE 1 "October 2026" "alacrittyForge v1.0.0" "User Commands"
+.TH ALACRITTYFORGE 1 "October 2026" "alacrittyForge v1.1.0" "User Commands"
 .
 .SH NAME
 alacrittyforge \- Alacritty's settings, without editing the file by hand
@@ -103,8 +103,9 @@ In a number: step through its presets.
 .B Esc
 Close a window.
 .TP
-.B 1 \(en 5 ", " Ctrl+letter
-Go to a screen.
+.B 1 \(en 6 ", " Ctrl+letter
+Go to a menu entry: the five screens, then Help (6, Ctrl+H). The letter is
+the one underlined in the menu bar.
 .TP
 .B F10 ", " S
 Save, with a review first.
@@ -149,7 +150,7 @@ One line per run, by day.
 .
 .SH REQUIREMENTS
 Linux with Alacritty 0.13 or newer; Python 3.11 or newer; python-textual,
-python-rich, python-tomlkit and python-forgekit 0.5.1 or newer; fontconfig.
+python-rich, python-tomlkit and python-forgekit 0.10.0 or newer; fontconfig.
 .
 .SH SEE ALSO
 .BR alacritty (1),

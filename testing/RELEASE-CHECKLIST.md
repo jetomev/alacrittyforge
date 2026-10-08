@@ -41,7 +41,7 @@ Before tagging, all of these must agree on the version string:
 
 ## v1.0.0+ gates
 
-- **All tests, no warnings:** `PYTHONPATH=../forgekit python -W default -m unittest tests.test_saving tests.test_session tests.test_themes tests.test_bindings tests.test_versions tests.test_manual tests.test_screens` (the AUR `check()` runs the same). Report the count; it was 80 at 1.0.0.
+- **All tests, no warnings:** `PYTHONPATH=../forgekit python -W default -m unittest tests.test_saving tests.test_session tests.test_themes tests.test_bindings tests.test_versions tests.test_manual tests.test_screens tests.test_v110` (the AUR `check()` must run the same list: a new test file goes into both). Report the count; it was 80 at 1.0.0, 103 at 1.1.0.
 - **100 columns, 25 lines:** the `*_100_columns` and `*_25_line_console` tests are the guard; also look at every screen with forgekit's `tools/console-preview.py --size 100x30`.
 - **Every major distribution:** `scripts/vm-distro-check.py` in grubForge's distro VMs (Ubuntu 24.04 = Alacritty 0.13, Debian 13 = 0.15, Fedora/openSUSE = 0.17): tests there, each distribution's own Alacritty reads a saved file with no warning, and warns on the wrong names.
 - **A real package upgrade before the tag:** `scripts/make-rc-packages.sh`, installed **with nog** (`nog install ./file.pkg.tar.zst`) over the released version in the KognogOS VM, for the human run. A fresh snapshot may need `nog update` first (its package lists).

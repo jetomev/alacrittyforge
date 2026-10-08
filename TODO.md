@@ -2,12 +2,24 @@
 
 *The live work list and the handoff between sessions. Newest work first. Updated after every step.*
 
-**Current release: v1.0.0** (2 Oct 2026): rebuilt to match grubForge 2.0, "so far the best of the 3" (Javier). Next: #16 hints, #17 mouse shortcuts.
+**Current release: v1.0.0** (2 Oct 2026): rebuilt to match grubForge 2.0, "so far the best of the 3" (Javier). **v1.1.0 built (8 Oct), waiting for Javier's test.** Next after it: #16 hints, #17 mouse shortcuts.
+
+## 1.1.0 — built, waiting for Javier's test; GitHub + AUR at release
+Issues [#19](https://github.com/jetomev/alacrittyforge/issues/19) (F-8: Help has no number, "1-5 screens" confusing; found by Javier inside hypeForge Settings, 8 Oct) and [#20](https://github.com/jetomev/alacrittyforge/issues/20) (`--hypeforge`, button labels). Needs forgekit 0.10.0 (released first).
+- [x] Menu keys from forgekit 0.10.0: the app's own 1-5 and Ctrl+O/E/T/U/K are gone; 1-6 in bar order (Help = 6) and Ctrl + the underlined letter for every entry; letters checked different (`menu_key_clashes`)
+- [x] Bottom bar "1-6 menu" (`MENU_HINT`); the Keys list says 1-6, Help, and "none inside hypeForge Settings" under Quit
+- [x] `--hypeforge` (any case): no Quit, Q / Ctrl+Q do nothing; Settings closes it and unsaved changes still ask; not in `--help` or the man page; written in README, manual (All keys, Getting started), CLAUDE.md, changelog
+- [x] Every button "Words In Title Case (k)" (the 3 Oct item below); manual + README quote the new names
+- [x] Found on the way: forgekit 0.10.0's Ctrl+T took the key from the shortcut recorder (1.0.0's own test caught it); forgekit now leaves an open window its keys, and a test here guards it
+- [x] Tests 80 → 103, warnings 0 → 0; each new test proven the other way (fix out → it fails)
+- [x] Test matrix: `testing/20261008 - Test Matrix for alacrittyForge v1-1-0.md` (§2 is Javier's run)
+- [ ] **Javier's run** (matrix §2: on its own, then inside hypeForge Settings)
+- [ ] At release (the lead): forgekit 0.10.0 first; AUR `PKGBUILD`: `python-forgekit>=0.10.0` and add `tests.test_v110` to `check()`'s list; tag, GitHub release, close #19 #20, AUR after Javier's pass; Vault entry
 
 - [x] Installed on the desktop through nog (2 Oct, 22:50): alacrittyforge 1.0.0-1, python-forgekit 0.5.1-1, python-tomlkit — the public AUR path works. Javier used it right away: 5 saves, one backup each; the 0.2.0-era backups still listed.
 
 
-- [ ] **Next version — button labels in Javier's format (3 Oct 2026):** "Words In Title Case (k)", e.g. "Review Updates (u)": the key in brackets after the words, for every Forge Suite app. What shipped stays until this app's next version.
+- [x] **Next version — button labels in Javier's format (3 Oct 2026):** "Words In Title Case (k)", e.g. "Review Updates (u)": the key in brackets after the words, for every Forge Suite app. Done in 1.1.0 (8 Oct, #20).
 ## Next — the grubForge 2.0 look (Javier, 2026-10-02)
 Same method as grubForge 2.0, which worked:
 - [x] Project kit: `CLAUDE.md` + this TODO (2 Oct); GitHub About/topics checked; Vault folder exists

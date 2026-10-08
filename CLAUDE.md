@@ -3,8 +3,9 @@
 A terminal app for Alacritty's settings (`~/.config/alacritty/alacritty.toml`): view, edit, theme, fonts, key bindings, with a backup before every save. Python 3.11+, Textual, on **forgekit**. Part of the Forge Suite; ships on the AUR as `alacrittyforge`. Name: **alacrittyForge** (lowercase a). People: Javier and Claude — never the Rullynastre persona names here.
 
 ## Run and test
-- Run from the tree: `PYTHONPATH=../forgekit python main.py` (the installed `python-forgekit` works too, if it is new enough).
-- Tests: none committed yet (the AUR `check()` does a headless mount). The 2.0-style rework adds `tests/`, and every release reports the count, which must never drop silently.
+- Run from the tree: `PYTHONPATH=../forgekit python main.py` (`../forgekit` is a link to `../forge-suite/forgekit`; the installed `python-forgekit` works too, if it is 0.10.0 or newer).
+- Tests: `PYTHONPATH=../forgekit python -W always -m unittest discover -s tests` (103 at 1.1.0). Every release reports the count, which must never drop silently, and the warnings. A new test file must also be added to the AUR `check()` and to `testing/RELEASE-CHECKLIST.md`, which name the files one by one.
+- **`--hypeforge`** (1.1.0, #20): hypeForge Settings starts the app with it (any case, `--hypeForge` too). Then there is no Quit: none in the menu bar, Q and Ctrl+Q do nothing; Settings closes the app through forgekit's `host_quit()`, which runs `before_quit()`, so unsaved changes still ask first. It is for Settings, not for people: kept out of `--help` and the man page (a test checks both), written down in the README, the manual's All keys page, this file and the changelog. `cli.py` spells the flag itself so `--version` stays instant; a test checks it matches forgekit's `HYPEFORGE_FLAG`.
 - It writes only user files, so it needs **no sudo and has no read-only mode**. Before testing a save on this desktop, copy `alacritty.toml` aside (see `testing/RELEASE-CHECKLIST.md`). Backups go to `~/.config/alacritty/backups/` (20 kept).
 - Look at it on a text console and at 100 columns: forgekit's `tools/console-preview.py --size 100x30`.
 
@@ -20,4 +21,6 @@ A terminal app for Alacritty's settings (`~/.config/alacritty/alacritty.toml`): 
 - Javier's message and flow rules: memory `feedback_designed_messages`.
 - Known values are picked, not typed (fonts, themes, colours, shells, booleans, key names).
 - Colours and marks only through forgekit's roles and `glyph()`, never raw hex in screens, so the text console works.
+- **Menu keys are forgekit's** (0.10.0): a number 1-6 in bar order (Help is 6, Quit has none) and Ctrl + each entry's underlined letter. The app binds none of these itself; the underlined letters must stay different (`menu_key_clashes`, tested), and no app or screen binding may take one. `MENU_HINT` in the hints shows as "1-6 menu".
+- **Button labels** (Javier, 2026-10-03): "Words In Title Case (k)", the key in round brackets after the words: the letter key when the button has one (lowercase, like `(n)`), else its other key (`(F2)`, `(Esc)`, `(Del)`, `(+)`); no key, title case only. Small words stay lowercase ("Restore the Newest Backup"), as in nogForge. The manual quotes labels exactly; `tests/test_v110.py` lists every one.
 - A design is approved by Javier, screen by screen, **before** code is written.
