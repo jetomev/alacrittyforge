@@ -10,7 +10,7 @@ Each backup says why it was made: **Before a save**, **Before restoring a backup
 
 ## Restore one
 
-1. Pick it and press **R**, or choose **Restore… (r)**.
+1. Pick it and press **R**, or choose **Restore (r)**.
 2. The window starts on **Cancel (n)**; choose **Restore (y)** to go ahead.
 
 What's there now is backed up first, so a restore can be undone the same way. Alacritty uses the restored settings straight away. If you had unsaved changes, they're dropped.
@@ -19,7 +19,7 @@ What's there now is backed up first, so a restore can be undone the same way. Al
 
 - **Back Up Now (n)**: make a backup whenever you like.
 - **Show Whole File**: read the backup exactly as it was saved.
-- **Delete… (d)**: delete a backup for good (the window starts on **Cancel (n)**; **Delete (y)** goes ahead).
+- **Delete (d)**: delete a backup for good (the window starts on **Cancel (n)**; **Delete (y)** goes ahead).
 
 If your settings file ever can't be read, the **Overview** offers **Restore the Newest Backup** too.
 

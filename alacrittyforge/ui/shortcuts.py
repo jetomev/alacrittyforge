@@ -47,7 +47,7 @@ class ShortcutsScreen(Vertical):
         t.FORGE_HINTS = self.FORGE_HINTS
         yield t
         with Horizontal(classes="forge-buttons sc-actions"):
-            yield Button(f"Add a Shortcut{glyph('ellipsis')} (+)", id="sc-add", variant="primary")
+            yield Button(f"Add a Shortcut (+)", id="sc-add", variant="primary")
             yield Button("Change (F2)", id="sc-change")
             yield Button("Remove (Del)", id="sc-remove")
             yield Button("Turn This One Off", id="sc-off")

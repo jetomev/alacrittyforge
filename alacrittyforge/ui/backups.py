@@ -76,11 +76,11 @@ class BackupsScreen(Horizontal):
             yield t
             yield Static("", id="bk-where")
             with Horizontal(classes="forge-buttons bk-actions"):
-                yield Button(f"Restore{glyph('ellipsis')} (r)", id="bk-restore", variant="primary")
+                yield Button(f"Restore (r)", id="bk-restore", variant="primary")
                 yield Button("Back Up Now (n)", id="bk-new")
             with Horizontal(classes="forge-buttons bk-actions"):
                 yield Button("Show Whole File", id="bk-show")
-                yield Button(f"Delete{glyph('ellipsis')} (d)", id="bk-delete")
+                yield Button(f"Delete (d)", id="bk-delete")
         with VerticalScroll(id="bk-right", classes="af-box", can_focus=False):
             yield Static("", id="bk-diff")
 

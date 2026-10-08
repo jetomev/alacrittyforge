@@ -93,10 +93,10 @@ class ThemesScreen(Horizontal):
             yield Static("", id="th-info")
             with Horizontal(classes="forge-buttons th-actions"):
                 yield Button("Use This Theme", id="th-use", variant="primary")
-                yield Button(f"Adjust Colours{glyph('ellipsis')} (a)", id="th-adjust")
+                yield Button(f"Adjust Colours (a)", id="th-adjust")
             with Horizontal(classes="forge-buttons th-actions"):
-                yield Button(f"Save My Colours as a Theme{glyph('ellipsis')}", id="th-saveown")
-                yield Button(f"Install a Theme{glyph('ellipsis')} (i)", id="th-install")
+                yield Button(f"Save My Colours as a Theme", id="th-saveown")
+                yield Button(f"Install a Theme (i)", id="th-install")
                 yield Button("Where to Get Themes", id="th-get")
 
     def on_mount(self) -> None:
@@ -290,7 +290,7 @@ class WhereToGet(ForgePanelScreen):
             "Alacritty's own collection has over a hundred themes, each one file:\n\n"
             f"[b]{GET_THEMES}[/]\n\n"
             "Open a theme there, download its .toml file (the Download raw file button), then come back "
-            "and choose [b]Install a Theme… (i)[/]. Files in your Downloads folder are "
+            "and choose [b]Install a Theme (i)[/]. Files in your Downloads folder are "
             "listed. Only files that change colours, and nothing else, are installed.")
 
 

@@ -275,7 +275,7 @@ class AlacrittyForgeApp(ForgeApp):
         n = s.change_count
         if n:
             bar.show(f"{n} change{'s' if n != 1 else ''} not saved yet", "changed",
-                     [("Save… (s)", "af-save", True), ("Discard", "af-discard", False)])
+                     [("Save Changes (s)", "af-save", True), ("Discard", "af-discard", False)])
         else:
             bar.hide()
 

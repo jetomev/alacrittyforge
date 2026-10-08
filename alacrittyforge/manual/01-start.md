@@ -16,7 +16,7 @@ That's all: Alacritty notices the saved file and uses the change straight away, 
 - **1 – 6** go to the menu entries: Overview, Settings, Themes, Shortcuts, Backups, and **6** opens Help. **Ctrl** + the letter underlined in the menu bar does the same.
 - **F1** explains whatever is selected. **?** lists every key. **M** opens this manual.
 - **Q** quits. If something isn't saved, alacrittyForge asks first. Inside **hypeForge Settings** there is no Quit: you close it from Settings, which still asks first. See [All keys](#keys).
-- Every button names its key in brackets, like **Save… (s)**.
+- Every button names its key in brackets, like **Save Changes (s)**.
 
 ## Good to know
 

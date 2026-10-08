@@ -30,7 +30,7 @@ Alacritty is one of the fastest and most elegant terminals on Linux. But it has 
 
 - 🏠 **Overview**: "is my terminal set up right?" in four boxes. Anything that needs attention comes with the button that fixes it: a file that can't be read, settings with old names, misspelled settings, no font installed.
 - 🔧 **Settings**: every Alacritty setting on Linux, in eight groups (Window, Text, Cursor, Scrolling & copy, Bell, Shell & start, Mouse & links, Advanced). Presets for numbers, worded switches, fonts and shells from your computer. A setting you haven't set shows what Alacritty does instead.
-- 🎨 **Themes**: a preview of a terminal in each theme's colours. **Adjust Colours… (a)** makes your own copy; themes another tool maintains (hypeForge's) stay locked; install theme files safely.
+- 🎨 **Themes**: a preview of a terminal in each theme's colours. **Adjust Colours (a)** makes your own copy; themes another tool maintains (hypeForge's) stay locked; install theme files safely.
 - ⌨ **Shortcuts**: every shortcut in words ("Make the text bigger"). Add one by **pressing its keys**; turn off any of Alacritty's own.
 - 🗂 **Backups**: why each was made, and what restoring it would change, before you do.
 - 💾 **Save with a review**: **F10** shows every change, old → new. Alacritty picks the change up straight away, in every open window.
@@ -188,7 +188,7 @@ A human and AI collaboration. The 1.0 redesign was drawn screen by screen and ap
 
 - ⌨ **Help has a number now**, and the bottom bar says what the numbers do: **1 – 6** go through the menu in order (Overview, Settings, Themes, Shortcuts, Backups, Help), and **Ctrl** + the underlined letter does the same, **Ctrl+H** for Help. The keys come from forgekit 0.10.0, the Forge Suite's shared base, so every Forge app works the same way. The bottom bar reads **1-6 menu** instead of the confusing "1-5 screens" ([#19](https://github.com/jetomev/alacrittyforge/issues/19), F-8).
 - 🧩 **Inside hypeForge Settings** ([#20](https://github.com/jetomev/alacrittyforge/issues/20)): hypeForge Settings starts alacrittyForge with `--hypeforge` (any spelling, `--hypeForge` too). There it has no Quit: none in the menu bar, and **Q** and **Ctrl+Q** do nothing. Settings closes it, and asks first if something isn't saved. `--help` doesn't list the option, because it is for Settings, not for people.
-- 🔘 **Every button names its key**, in Javier's format: words in title case, the key in brackets after them. **Back Up Now (n)**, **Change (F2)**, **Restore… (r)**, **Cancel (Esc)**, **Save… (s)** in the changes bar. The manual quotes the new names.
+- 🔘 **Every button names its key**, in Javier's format: words in title case, the key in brackets after them. **Back Up Now (n)**, **Change (F2)**, **Restore (r)**, **Cancel (Esc)**, **Save Changes (s)** in the changes bar. The manual quotes the new names.
 - 🎙 **Recording a shortcut still takes every key.** Found by 1.0.0's own test when moving to forgekit 0.10.0: its new **Ctrl+T** (Themes) caught the key before the recorder in **Add a Shortcut** could. forgekit now leaves an open window its own keys (only Quit gets through), and a test here makes sure Ctrl+O, E, T, U, K and H are recorded.
 
 Tests: 80 → **103**; warnings 0 → 0. Needs `python-forgekit` ≥ 0.10.0.
