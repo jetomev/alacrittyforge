@@ -293,7 +293,7 @@ LABELS = {
                   "sc-off": "Turn This One Off", "sc-modes": "Show Vi and Search Keys"},
     "backups": {"bk-restore": "Restore (r)", "bk-new": "Back Up Now (n)", "bk-show": "Show Whole File",
                 "bk-delete": "Delete (d)"},
-    "bar": {"af-save": "Save Changes (s)", "af-discard": "Discard"},
+    "bar": {"af-save": "Save Changes (s)", "af-discard": "Discard Changes"},
     "quit": {"save": "Save First", "quit": "Quit Without Saving", "stay": "Stay (Esc)"},
     "shortcut-window": {"sd-ok": "Add It", "sd-cancel": "Cancel (Esc)"},
     "adjust-window": {"ad-keep": "Keep These Colours", "ad-cancel": "Cancel (Esc)"},

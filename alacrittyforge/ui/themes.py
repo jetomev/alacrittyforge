@@ -182,7 +182,7 @@ class ThemesScreen(Horizontal):
             info.append("Written in your settings file itself. A theme file you use replaces them.")
         elif t.locked:
             info.append(f"Made by {t.locked_by}, which rewrites it, so it is locked: use it as it is, or "
-                        f"press Adjust Colours{glyph('ellipsis')} (a) to make your own copy.")
+                        f"press Adjust Colours (a) to make your own copy.")
         elif t.pending:
             info.append("New: it is written when you save (F10).")
         self.query_one("#th-info", Static).update("\n".join(f"[$forge-muted]{escape(x)}[/]" for x in info))
