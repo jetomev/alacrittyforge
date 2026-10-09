@@ -4,6 +4,9 @@
 
 **Current release: v1.1.0** (8 Oct 2026). Before it, v1.0.0 (2 Oct 2026): rebuilt to match grubForge 2.0, "so far the best of the 3" (Javier). **v1.1.0 released 2026-10-08 (GitHub + AUR; Javier on the installed package: "all perfect!") Next after it: #16 hints, #17 mouse shortcuts.
 
+## At the next release
+- [ ] **The AUR description, at the next release** (Javier, 2026-10-09): the AUR `pkgdesc` (and `.SRCINFO`) gets the same "where it runs" words as the README, GitHub About and kognogos.org — distribution · desktop · plain text console. Not pushed on its own: AUR pushes stay one per proven version.
+
 ## 1.1.0 — released 2026-10-08 (GitHub + AUR; Javier on the installed package: "all perfect!")
 Issues [#19](https://github.com/jetomev/alacrittyforge/issues/19) (F-8: Help has no number, "1-5 screens" confusing; found by Javier inside hypeForge Settings, 8 Oct) and [#20](https://github.com/jetomev/alacrittyforge/issues/20) (`--hypeforge`, button labels). Needs forgekit 0.10.0 (released first).
 - [x] Menu keys from forgekit 0.10.0: the app's own 1-5 and Ctrl+O/E/T/U/K are gone; 1-6 in bar order (Help = 6) and Ctrl + the underlined letter for every entry

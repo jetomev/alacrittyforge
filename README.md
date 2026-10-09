@@ -2,6 +2,8 @@
 
 > Alacritty's settings, without editing the file by hand: every setting in plain words, picked from lists, reviewed before it's saved, with a backup first and your own notes kept.
 
+> 🖥 **Where it runs:** **any Linux distribution** · for the **Alacritty** terminal; **no particular desktop needed** · **works on a plain text console** (a tty).
+
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Platform: Linux](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
 ![Python: 3.11+](https://img.shields.io/badge/Python-3.11+-green.svg)
