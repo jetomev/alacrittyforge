@@ -41,7 +41,6 @@ class Manual(unittest.TestCase):
 class F1(unittest.IsolatedAsyncioTestCase):
     async def test_f1_on_a_setting_opens_its_page(self):
         import tempfile
-        from forgekit import ManualScreen
         from alacrittyforge.app import AlacrittyForgeApp
         from alacrittyforge.session import Session
         with tempfile.TemporaryDirectory() as t:
@@ -57,8 +56,10 @@ class F1(unittest.IsolatedAsyncioTestCase):
                 await pilot.pause(0.2)
                 await pilot.press("f1")
                 await pilot.pause(0.4)
-                self.assertIsInstance(app.screen, ManualScreen)
-                self.assertEqual(app.screen._start, "cursor")
+                # 1.1.0: the manual is a page of the app (forgekit 0.10.0), not a window
+                self.assertEqual(len(app.screen_stack), 1)
+                self.assertEqual(app.query_one("#forge-work").current, "sec-forge-manual")
+                self.assertEqual(app.query_one("#sec-forge-manual").current, "cursor")
 
 
 if __name__ == "__main__":

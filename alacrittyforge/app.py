@@ -11,7 +11,8 @@ Javier's rulings for 1.0.0 (2 Oct 2026, docs/design/v1.0.0-screens.html):
 * no Rebuild step: Alacritty picks a saved change up by itself.
 
 1.1.0 (#19, #20): the menu keys come from forgekit 0.10.0 (a number 1-6 and
-Ctrl + the underlined letter for every entry, Help included); started with
+Ctrl + the underlined letter for every entry, Help included; the letters follow
+Javier's rule in forgekit: O S T R B, H for Help); started with
 --hypeforge, the app is a page of hypeForge Settings and has no Quit; every
 button reads "Words In Title Case (k)", with its key in brackets. An open window
 (Add a shortcut, a review) keeps its own keys: forgekit 0.10.0 lets no menu key
@@ -30,7 +31,7 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.widgets import Button, Static
 
 from forgekit import (
-    FORGE_CSS, GPL3_NOTICE, MENU_HINT, ChangeGroup, ForgeApp, ForgeModal, ForgePanelScreen, ManualScreen,
+    FORGE_CSS, GPL3_NOTICE, MENU_HINT, ChangeGroup, ForgeApp, ForgeModal, ForgePanelScreen,
     Notice, ReviewDialog, load_pages,
 )
 
@@ -158,12 +159,15 @@ class AlacrittyForgeApp(ForgeApp):
     SHOW_CHANGES_BAR = True
     CSS = AF_CSS
     LICENSE_NOTICE = GPL3_NOTICE
+    # 1.1.0: no "acc" any more. forgekit gives each entry its letter by Javier's rule (the first
+    # letter of the title, else the next free one): Overview O, Settings S, Themes T,
+    # Shortcuts R, Backups B; Help is always H, Quit Q
     MENU = [
         {"id": "overview", "title": "Overview", "kind": "section"},
-        {"id": "settings", "title": "Settings", "kind": "section", "acc": "e"},
+        {"id": "settings", "title": "Settings", "kind": "section"},
         {"id": "themes", "title": "Themes", "kind": "section"},
-        {"id": "shortcuts", "title": "Shortcuts", "kind": "section", "acc": "u"},
-        {"id": "backups", "title": "Backups", "kind": "section", "acc": "k"},
+        {"id": "shortcuts", "title": "Shortcuts", "kind": "section"},
+        {"id": "backups", "title": "Backups", "kind": "section"},
         {"id": "help", "title": "Help", "kind": "menu", "items": [
             ("Manual", "m", "manual"), ("Keys", "k", "shortcuts"),
             ("License", "l", "license"), ("About", "a", "about")]},
@@ -174,13 +178,13 @@ class AlacrittyForgeApp(ForgeApp):
         ("Enter", "open a list, press a button, confirm"),
         ("Space", "flip a switch"),
         ("↑↓ in a number", "step through its presets"),
-        ("Esc", "close a window"),
+        ("Esc", "close a window; leave a Help page"),
         ("1-6", "go to a menu entry: the five screens, then Help"),
         ("Ctrl+letter", "the same, by its underlined letter"),
         ("F10 or S", "save, with a review first"),
         ("R", "read the file again"),
         ("F1", "help on what is selected"),
-        ("M", "the manual"),
+        ("M", "the manual (Backspace: its previous page)"),
         ("?", "this list"),
         ("Q or Ctrl+Q", "quit (asks first if something isn't saved)"),
         ("", "none inside hypeForge Settings: close it there"),
@@ -252,7 +256,8 @@ class AlacrittyForgeApp(ForgeApp):
         if not pages:
             self.notify("The manual isn't written yet.", severity="warning")
             return
-        self.push_screen(ManualScreen("alacrittyForge manual", pages, start=page))
+        # 1.1.0: a page of the app, like Keys, About and License (forgekit 0.10.0); Esc goes back
+        self.show_manual("alacrittyForge manual", pages, start=page)
 
     def action_field_help(self) -> None:
         from forgekit import SettingRow

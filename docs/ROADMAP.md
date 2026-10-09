@@ -4,7 +4,9 @@
 
 ### v1.1.0 — October 8, 2026
 - [x] 1 – 6 and Ctrl + the underlined letter for every menu entry, Help included, from forgekit 0.10.0 (#19, F-8)
-- [x] "1-6 menu" in the bottom bar
+- [x] "1-6 menu" in the bottom bar; 6 again closes Help
+- [x] Javier's letter rule: Ctrl+O, S, T, R, B, H
+- [x] Help's pages inside the app: Manual, Keys, About, License; Esc goes back
 - [x] `--hypeforge`: no Quit inside hypeForge Settings; Settings closes it, asking first (#20)
 - [x] Every button names its key: "Back Up Now (n)" (#20)
 

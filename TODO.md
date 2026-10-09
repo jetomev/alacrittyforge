@@ -6,12 +6,14 @@
 
 ## 1.1.0 — built, waiting for Javier's test; GitHub + AUR at release
 Issues [#19](https://github.com/jetomev/alacrittyforge/issues/19) (F-8: Help has no number, "1-5 screens" confusing; found by Javier inside hypeForge Settings, 8 Oct) and [#20](https://github.com/jetomev/alacrittyforge/issues/20) (`--hypeforge`, button labels). Needs forgekit 0.10.0 (released first).
-- [x] Menu keys from forgekit 0.10.0: the app's own 1-5 and Ctrl+O/E/T/U/K are gone; 1-6 in bar order (Help = 6) and Ctrl + the underlined letter for every entry; letters checked different (`menu_key_clashes`)
+- [x] Menu keys from forgekit 0.10.0: the app's own 1-5 and Ctrl+O/E/T/U/K are gone; 1-6 in bar order (Help = 6) and Ctrl + the underlined letter for every entry
+- [x] Round 2 (Javier's second run, 8 Oct; forgekit `d3e8e90`): Javier's letter rule → **Ctrl+O, S, T, R, B, H** (Settings was E, Shortcuts U, Backups K); the app's `acc` removed; 6 again closes Help, Help lit while open; About and License as pages, Esc goes back. Manual, README, man page, changelog, matrix updated
+- [x] Round 3 (Javier: "yes, Keys and Manual as pages too"; forgekit `d7b7ba3`): the manual opens with `show_manual` (F1 still lands on the setting's page), Keys is a page; Esc back, Backspace = previous manual page
 - [x] Bottom bar "1-6 menu" (`MENU_HINT`); the Keys list says 1-6, Help, and "none inside hypeForge Settings" under Quit
 - [x] `--hypeforge` (any case): no Quit, Q / Ctrl+Q do nothing; Settings closes it and unsaved changes still ask; not in `--help` or the man page; written in README, manual (All keys, Getting started), CLAUDE.md, changelog
 - [x] Every button "Words In Title Case (k)" (the 3 Oct item below); manual + README quote the new names
 - [x] Found on the way: forgekit 0.10.0's Ctrl+T took the key from the shortcut recorder (1.0.0's own test caught it); forgekit now leaves an open window its keys, and a test here guards it
-- [x] Tests 80 → 103, warnings 0 → 0; each new test proven the other way (fix out → it fails)
+- [x] Tests 80 → 109, warnings 0 → 0; each new test proven the other way (fix out → it fails; 29 checks)
 - [x] Test matrix: `testing/20261008 - Test Matrix for alacrittyForge v1-1-0.md` (§2 is Javier's run)
 - [ ] **Javier's run** (matrix §2: on its own, then inside hypeForge Settings)
 - [ ] At release (the lead): forgekit 0.10.0 first; AUR `PKGBUILD`: `python-forgekit>=0.10.0` and add `tests.test_v110` to `check()`'s list; tag, GitHub release, close #19 #20, AUR after Javier's pass; Vault entry

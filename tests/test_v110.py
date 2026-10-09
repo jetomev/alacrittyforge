@@ -25,8 +25,9 @@ from alacrittyforge.app import AlacrittyForgeApp  # noqa: E402
 import test_screens  # noqa: E402
 
 SECTIONS = ["overview", "settings", "themes", "shortcuts", "backups"]
-CTRL = {"overview": "ctrl+o", "settings": "ctrl+e", "themes": "ctrl+t", "shortcuts": "ctrl+u",
-        "backups": "ctrl+k"}
+# Javier's letter rule (forgekit 0.10.0): the first letter of the title, else the next free one
+CTRL = {"overview": "ctrl+o", "settings": "ctrl+s", "themes": "ctrl+t", "shortcuts": "ctrl+r",
+        "backups": "ctrl+b"}
 
 
 def active(app) -> list[str]:
@@ -34,19 +35,37 @@ def active(app) -> list[str]:
 
 
 class MenuLetters(unittest.TestCase):
-    def test_every_underlined_letter_is_different(self):
-        self.assertEqual(menu_key_clashes(AlacrittyForgeApp.MENU), [])
+    def made(self) -> AlacrittyForgeApp:
+        import tempfile
+        from alacrittyforge.session import Session
+        d = Path(tempfile.mkdtemp())
+        return AlacrittyForgeApp(session=Session.load(d / "alacritty.toml", backup_dir=d / "bk", themes_dir=d / "t",
+                                                      version=(0, 17, 0)))
 
-    def test_the_letters_are_the_ones_the_manual_names(self):
-        self.assertEqual({m["id"]: accel(m) for m in AlacrittyForgeApp.MENU},
+    def test_every_entry_gets_a_letter_of_its_own(self):
+        self.assertEqual(menu_key_clashes(AlacrittyForgeApp.MENU), [])
+        letters = [accel(m) for m in self.made().MENU]
+        self.assertTrue(all(letters))
+        self.assertEqual(len(set(letters)), len(letters))
+
+    def test_the_letters_follow_javiers_rule(self):
+        """O S T R B, H, Q: the first letter of the title, else the next free one (Settings takes S,
+        so Shortcuts goes on to its R); the manual, README and man page name these."""
+        self.assertEqual({m["id"]: accel(m) for m in self.made().MENU},
                          {**{k: v[-1] for k, v in CTRL.items()}, "help": "h", "quit": "q"})
+
+    def test_the_app_names_no_letters_itself(self):
+        self.assertEqual([m["id"] for m in AlacrittyForgeApp.MENU if "acc" in m], [],
+                         '"acc" does nothing since forgekit 0.10.0; it would only mislead')
 
     def test_no_key_of_ours_takes_a_menu_key(self):
         """The numbers and Ctrl+<letter> are forgekit's now: none of alacrittyForge's own
         bindings, on the app or on any screen or window, may use one."""
+        from forgekit import assign_accels
         from alacrittyforge import app as app_mod
         from alacrittyforge.ui import backups, overview, settings, shortcuts, themes
-        menu_keys = {f"ctrl+{accel(m)}" for m in AlacrittyForgeApp.MENU} | {str(n) for n in range(1, 10)}
+        menu_keys = ({f"ctrl+{c}" for c in assign_accels(AlacrittyForgeApp.MENU).values()}
+                     | {str(n) for n in range(1, 10)})
         found = []
         for mod in (app_mod, backups, overview, settings, shortcuts, themes):
             for name in dir(mod):
@@ -106,7 +125,7 @@ class MenuKeys(test_screens.Screens):
             await pilot.pause(0.4)
             field = next(i for i in app.query_one("#sec-settings").query(Input) if i.display)
             field.focus()
-            await pilot.press("ctrl+k")
+            await pilot.press("ctrl+b")
             await pilot.pause(0.3)
             self.assertEqual(active(app), ["backups"])
 
@@ -148,8 +167,8 @@ class MenuKeys(test_screens.Screens):
             self.assertEqual(active(app), ["shortcuts"], "nothing moved behind the window")
 
     async def test_an_open_window_keeps_its_fields_ctrl_keys(self):
-        """Ctrl+E inside a window's text field is the field's (end of line); no screen switch
-        happens behind the window."""
+        """In a window's text field, Ctrl + a menu letter switches nothing behind the window and
+        leaves the text alone."""
         from textual.widgets import Input
         from alacrittyforge.ui.shortcuts import ShortcutDialog
         app = self.app()
@@ -165,11 +184,122 @@ class MenuKeys(test_screens.Screens):
             self.assertTrue(field.display)
             field.focus()
             await pilot.press(*"firefox")
-            await pilot.press("home", "ctrl+e")
+            for key in ("ctrl+b", "ctrl+s", "ctrl+o"):
+                await pilot.press(key)
+                await pilot.pause(0.2)
+                self.assertIsInstance(app.screen, ShortcutDialog, f"{key} left the window")
+                self.assertEqual(active(app), ["shortcuts"], f"{key} switched the screen behind the window")
+            self.assertEqual(field.value, "firefox")
+
+
+class HelpMenu(test_screens.Screens):
+    """Javier's second run (2026-10-08): Help's number closes it again, Help is lit while it is
+    open, and About and License are pages in the app, not windows; Esc goes back."""
+
+    async def test_6_opens_help_lit_and_6_again_closes_it(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.4)
+            app.set_focus(None)
+            await pilot.press("6")
             await pilot.pause(0.3)
-            self.assertIsInstance(app.screen, ShortcutDialog)
-            self.assertEqual(active(app), ["shortcuts"], "Ctrl+E switched the screen behind the window")
-            self.assertEqual(field.cursor_position, len("firefox"), "Ctrl+E is the field's: end of line")
+            self.assertEqual(getattr(app.screen, "menu_id", None), "help")
+            self.assertTrue(app.query_one("#menu-help").has_class("open"), "Help is lit while open")
+            await pilot.press("6")
+            await pilot.pause(0.3)
+            self.assertEqual(len(app.screen_stack), 1, "6 again closes Help")
+            self.assertFalse(app.query_one("#menu-help").has_class("open"))
+            self.assertEqual(active(app), ["overview"])
+
+    async def test_about_and_license_are_pages_and_esc_goes_back(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.pause(0.4)
+            for item, page in (("a", "forge-about"), ("l", "forge-license")):
+                await pilot.press("3")                               # from Themes
+                await pilot.pause(0.4)
+                app.set_focus(None)
+                await pilot.press("6")
+                await pilot.pause(0.3)
+                await pilot.press(item)
+                await pilot.pause(0.4)
+                self.assertEqual(len(app.screen_stack), 1, f"{page}: a page, not a window")
+                work = app.query_one("#forge-work")
+                self.assertEqual(work.current, f"sec-{page}")
+                self.assertEqual(work.visible_content.id, f"sec-{page}")
+                self.assertEqual(active(app), ["help"], "Help is lit while it shows")
+                if page == "forge-about":
+                    text = " ".join(str(w.render()) for w in work.visible_content.query("Static"))
+                    self.assertIn("alacrittyForge", text)
+                await pilot.press("escape")
+                await pilot.pause(0.4)
+                self.assertEqual(work.current, "sec-themes", f"{page}: Esc goes back where you came from")
+                self.assertEqual(active(app), ["themes"])
+
+
+class HelpPages(test_screens.Screens):
+    """Javier, 2026-10-08: "yes, Keys and Manual as pages too". The manual (M, F1, Help ▸ Manual)
+    and the Keys list (?, Help ▸ Keys) show in the app, Help lit; Esc goes back."""
+
+    def shown(self, app) -> str:
+        return app.query_one("#forge-work").current
+
+    async def test_f1_on_a_setting_opens_its_manual_page_and_esc_returns(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.press("2")
+            await pilot.pause(0.4)
+            app.query_one("#af-groups").highlighted = 2          # Cursor
+            await pilot.pause(0.3)
+            app.query_one("#row-cursor-style-shape").control.focus()
+            await pilot.pause(0.2)
+            await pilot.press("f1")
+            await pilot.pause(0.5)
+            self.assertEqual(len(app.screen_stack), 1, "a page, not a window")
+            self.assertEqual(self.shown(app), "sec-forge-manual")
+            self.assertEqual(app.query_one("#sec-forge-manual").current, "cursor", "at the setting's page")
+            self.assertEqual(active(app), ["help"], "Help lit")
+            await pilot.press("escape")
+            await pilot.pause(0.4)
+            self.assertEqual(self.shown(app), "sec-settings")
+            self.assertEqual(active(app), ["settings"])
+
+    async def test_m_opens_the_manual_at_the_start_and_again_after_f1(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.press("3")
+            await pilot.pause(0.4)
+            app.set_focus(None)
+            await pilot.press("m")
+            await pilot.pause(0.5)
+            self.assertEqual(len(app.screen_stack), 1)
+            self.assertEqual(self.shown(app), "sec-forge-manual")
+            self.assertEqual(app.query_one("#sec-forge-manual").current, "start")
+            self.assertEqual(active(app), ["help"])
+            await pilot.press("escape")
+            await pilot.pause(0.4)
+            self.assertEqual(self.shown(app), "sec-themes")
+            app.open_manual(page="backups")                      # opened a second time, at a page
+            await pilot.pause(0.5)
+            self.assertEqual(self.shown(app), "sec-forge-manual")
+            self.assertEqual(app.query_one("#sec-forge-manual").current, "backups")
+
+    async def test_question_mark_opens_keys_as_a_page_and_esc_returns(self):
+        app = self.app()
+        async with app.run_test(size=(120, 40)) as pilot:
+            await pilot.press("5")
+            await pilot.pause(0.4)
+            app.set_focus(None)
+            await pilot.press("question_mark")
+            await pilot.pause(0.4)
+            self.assertEqual(len(app.screen_stack), 1, "a page, not a window")
+            self.assertEqual(self.shown(app), "sec-forge-keys")
+            self.assertEqual(active(app), ["help"])
+            text = " ".join(str(w.render()) for w in app.query_one("#sec-forge-keys").query("Static"))
+            self.assertIn("1-6", text)
+            await pilot.press("escape")
+            await pilot.pause(0.4)
+            self.assertEqual(self.shown(app), "sec-backups")
 
 
 class InsideHypeForgeSettings(test_screens.Screens):
@@ -411,7 +541,7 @@ class ButtonLabels(test_screens.Screens):
 
 
 # test_screens' own tests run from test_screens.py; don't run them again from here
-for _cls in (MenuKeys, InsideHypeForgeSettings, ButtonLabels):
+for _cls in (MenuKeys, HelpMenu, HelpPages, InsideHypeForgeSettings, ButtonLabels):
     for _name in [n for n in vars(test_screens.Screens) if n.startswith("test_")]:
         setattr(_cls, _name, None)
 del _cls, _name                  # a name left holding a test class would load it twice

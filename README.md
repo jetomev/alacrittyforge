@@ -133,8 +133,8 @@ hypeForge Settings (the KognogOS desktop's settings window) opens alacrittyForge
 | Enter | open a list, press a button, confirm |
 | Space | flip a switch |
 | ↑ ↓ in a number | step through its presets |
-| Esc | close a window |
-| 1 – 6, or Ctrl + the underlined letter | Overview, Settings, Themes, Shortcuts, Backups, then Help (6, Ctrl+H) |
+| Esc | close a window; leave a Help page (Manual, Keys, About, License) |
+| 1 – 6, or Ctrl + the underlined letter | Overview (Ctrl+O), Settings (Ctrl+S), Themes (Ctrl+T), Shortcuts (Ctrl+R), Backups (Ctrl+B), then Help (6, Ctrl+H; 6 again closes it) |
 | F10, or S | save, with a review first |
 | R | read the file again (your unsaved changes stay) |
 | F1 | help on what is selected |
@@ -142,7 +142,7 @@ hypeForge Settings (the KognogOS desktop's settings window) opens alacrittyForge
 | ? | all keys |
 | Q, or Ctrl+Q | quit (asks first if something isn't saved); not there inside hypeForge Settings |
 
-In Themes: **Enter** uses a theme, **A** adjusts its colours, **I** installs one. In Shortcuts: **+** adds, **F2** changes, **Delete** removes. In Backups: **R** restores, **N** backs up now, **D** deletes. Letter keys and numbers never act while you're typing in a field; Ctrl + a menu letter does. Every button shows its key in brackets after its name, like **Back Up Now (n)**.
+In Themes: **Enter** uses a theme, **A** adjusts its colours, **I** installs one. In Shortcuts: **+** adds, **F2** changes, **Delete** removes. In Backups: **R** restores, **N** backs up now, **D** deletes. Letter keys and numbers never act while you're typing in a field; Ctrl + a menu letter does. Every button shows its key in brackets after its name, like **Back Up Now (n)**. Help's **Manual**, **Keys**, **About** and **License** are pages of the app; **Esc** goes back, and **Backspace** in the manual goes to the page you read before.
 
 The full manual is in [`alacrittyforge/manual/`](alacrittyforge/manual/), and inside the app with **M**.
 
@@ -174,7 +174,7 @@ A human and AI collaboration. The 1.0 redesign was drawn screen by screen and ap
 
 ### Done
 
-- [x] **v1.1.0** ([#19](https://github.com/jetomev/alacrittyforge/issues/19), [#20](https://github.com/jetomev/alacrittyforge/issues/20)): 1 – 6 and Ctrl + the underlined letter for every menu entry, Help included; "1-6 menu" in the bottom bar; no Quit inside hypeForge Settings; every button names its key
+- [x] **v1.1.0** ([#19](https://github.com/jetomev/alacrittyforge/issues/19), [#20](https://github.com/jetomev/alacrittyforge/issues/20)): 1 – 6 and Ctrl + the underlined letter for every menu entry, Help included, letters by Javier's rule; "1-6 menu" in the bottom bar; Help's pages (Manual, Keys, About, License) inside the app; no Quit inside hypeForge Settings; every button names its key
 - [x] **v1.0.0** ([#8](https://github.com/jetomev/alacrittyforge/issues/8)): rebuilt to match grubForge 2.0; safe saving that keeps your notes; every setting; shortcuts recorded by pressing keys; backups you can restore; every major distribution
 - [x] Earlier releases: [docs/ROADMAP.md](docs/ROADMAP.md)
 
@@ -186,12 +186,14 @@ A human and AI collaboration. The 1.0 redesign was drawn screen by screen and ap
 
 **Keys that work like every other Forge app, a place inside hypeForge Settings, and buttons that name their keys.** From Javier's notes of October 3 and 8.
 
-- ⌨ **Help has a number now**, and the bottom bar says what the numbers do: **1 – 6** go through the menu in order (Overview, Settings, Themes, Shortcuts, Backups, Help), and **Ctrl** + the underlined letter does the same, **Ctrl+H** for Help. The keys come from forgekit 0.10.0, the Forge Suite's shared base, so every Forge app works the same way. The bottom bar reads **1-6 menu** instead of the confusing "1-5 screens" ([#19](https://github.com/jetomev/alacrittyforge/issues/19), F-8).
+- ⌨ **Help has a number now**, and the bottom bar says what the numbers do: **1 – 6** go through the menu in order (Overview, Settings, Themes, Shortcuts, Backups, Help), and **6** again closes Help. The bottom bar reads **1-6 menu** instead of the confusing "1-5 screens" ([#19](https://github.com/jetomev/alacrittyforge/issues/19), F-8). The keys come from forgekit 0.10.0, the Forge Suite's shared base, so every Forge app works the same way.
+- 🔤 **Javier's letter rule** for **Ctrl** + the underlined letter: the first letter of the name, unless another entry already has it, then the next letter of the name. So **Ctrl+O** Overview, **Ctrl+S** Settings (was E), **Ctrl+T** Themes, **Ctrl+R** Shortcuts (was U), **Ctrl+B** Backups (was K), **Ctrl+H** Help.
+- 📄 **Help's pages open inside the app**, not as windows: the **Manual** (**M**, and **F1** at the setting's page), **Keys** (**?**), **About** and **License**. Help stays lit while they show (and while its menu is open), and **Esc** goes back to the page you came from.
 - 🧩 **Inside hypeForge Settings** ([#20](https://github.com/jetomev/alacrittyforge/issues/20)): hypeForge Settings starts alacrittyForge with `--hypeforge` (any spelling, `--hypeForge` too). There it has no Quit: none in the menu bar, and **Q** and **Ctrl+Q** do nothing. Settings closes it, and asks first if something isn't saved. `--help` doesn't list the option, because it is for Settings, not for people.
 - 🔘 **Every button names its key**, in Javier's format: words in title case, the key in brackets after them. **Back Up Now (n)**, **Change (F2)**, **Restore (r)**, **Cancel (Esc)**, **Save Changes (s)** in the changes bar. The manual quotes the new names.
-- 🎙 **Recording a shortcut still takes every key.** Found by 1.0.0's own test when moving to forgekit 0.10.0: its new **Ctrl+T** (Themes) caught the key before the recorder in **Add a Shortcut** could. forgekit now leaves an open window its own keys (only Quit gets through), and a test here makes sure Ctrl+O, E, T, U, K and H are recorded.
+- 🎙 **Recording a shortcut still takes every key.** Found by 1.0.0's own test when moving to forgekit 0.10.0: its new **Ctrl+T** (Themes) caught the key before the recorder in **Add a Shortcut** could. forgekit now leaves an open window its own keys (only Quit gets through), and a test here makes sure Ctrl+O, S, T, R, B and H are recorded.
 
-Tests: 80 → **103**; warnings 0 → 0. Needs `python-forgekit` ≥ 0.10.0.
+Tests: 80 → **109**; warnings 0 → 0. Needs `python-forgekit` ≥ 0.10.0.
 
 ### v1.0.0 — October 2, 2026
 
