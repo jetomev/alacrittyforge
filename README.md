@@ -69,6 +69,8 @@ Alacritty is one of the fastest and most elegant terminals on Linux. But it has 
 
 ## Requirements
 
+**Everything it needs** to build, run and test, with why, is in [docs/PACKAGING.md](docs/PACKAGING.md), measured from the code (the Forge Suite's [dependency audit](https://github.com/jetomev/forge-suite/issues/91), 2026-10-11).
+
 - Linux, with **Alacritty 0.13 or newer** (alacrittyForge reads `alacritty --version` and writes the names that version reads)
 - Python 3.11 or newer
 - `python-textual`, `python-rich`, `python-tomlkit` and [`python-forgekit`](https://github.com/jetomev/forge-suite/tree/main/forgekit) 0.10.0 or newer
