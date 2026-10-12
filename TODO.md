@@ -4,6 +4,9 @@
 
 **Current release: v1.1.0** (8 Oct 2026). Before it, v1.0.0 (2 Oct 2026): rebuilt to match grubForge 2.0, "so far the best of the 3" (Javier). **v1.1.0 released 2026-10-08 (GitHub + AUR; Javier on the installed package: "all perfect!") Next after it: #16 hints, #17 mouse shortcuts.
 
+## 2026-10-11 · What it needs, measured
+- [x] **What it needs, measured** (2026-10-11, forge-suite#91): `docs/PACKAGING.md` + `tests/test_needs.py`; the AUR recipe 1.1.0-1 builds clean in a clean Arch system and matches the code
+
 ## At the next release
 - [ ] **The AUR description, at the next release** (Javier, 2026-10-09): the AUR `pkgdesc` (and `.SRCINFO`) gets the same "where it runs" words as the README, GitHub About and kognogos.org — distribution · desktop · plain text console. Not pushed on its own: AUR pushes stay one per proven version.
 
