@@ -1,6 +1,6 @@
 # alacrittyForge — how this project works (L2)
 
-A terminal app for Alacritty's settings (`~/.config/alacritty/alacritty.toml`): view, edit, theme, fonts, key bindings, with a backup before every save. Python 3.11+, Textual, on **forgekit**. Part of the Forge Suite; ships on the AUR as `alacrittyforge`. Name: **alacrittyForge** (lowercase a). People: Javier and Claude — never the Rullynastre persona names here.
+A terminal app for Alacritty's settings (`~/.config/alacritty/alacritty.toml`): view, edit, theme, fonts, key bindings, with a backup before every save. Python 3.11+, Textual, on **forgekit**. Part of the Forge Suite; ships on the AUR as `alacrittyforge`. Name: **alacrittyForge** (lowercase a).
 
 ## Run and test
 - Run from the tree: `PYTHONPATH=../forgekit python main.py` (`../forgekit` is a link to `../forge-suite/forgekit`; the installed `python-forgekit` works too, if it is 0.10.0 or newer).
